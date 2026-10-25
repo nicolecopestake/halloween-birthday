@@ -45,7 +45,7 @@ const bad = [
   ["negative quantity", { ...anna, items: { s_gougeres: -1 } }],
   ["fractional quantity", { ...anna, items: { s_gougeres: 1.5 } }],
   ["quantity as string", { ...anna, items: { s_gougeres: "2" } }],
-  ["more eggs than larb", { ...anna, items: { s_larb: 1 }, egg: 2 }],
+  ["egg yolks over 9", { ...anna, items: { s_larb: 1 }, egg: 10 }],
   ["egg without larb", { ...anna, items: {}, egg: 1 }],
   ["empty name", { ...anna, name: "   " }],
   ["name too long", { ...anna, name: "x".repeat(61) }],
@@ -71,6 +71,16 @@ await ok("rejects bad ids, actions and bodies", async () => {
 await ok("name 60 chars and notes 400 chars are accepted; Thai text works", async () => {
   const d = await call({ action: "save", id: B, order: { name: "B".repeat(60), items: { s_cashew: 9 }, egg: 0, notes: "ไม่ทานเผ็ด " + "x".repeat(389) } });
   assert.equal(d.ok, true, JSON.stringify(d)); assert.equal(d.me.notes.length, 400);
+});
+
+await ok("more egg yolks than larb portions is fine", async () => {
+  const x = id("Eggs");
+  const d = await call({ action: "save", id: x, order: { name: "Eggy", items: { s_larb: 1 }, egg: 3 } });
+  assert.equal(d.ok, true, JSON.stringify(d)); assert.equal(d.me.egg, 3);
+  const orders = (await sheet()).find(s => s.name === "Orders");
+  const head = orders.rows[0];
+  assert.equal(orders.rows.find(r => r[0] === "Eggy")[head.indexOf("Total (THB)")], 260 + 3 * 20);
+  await call({ action: "adminRemove", key: KEY, target: x });
 });
 
 await ok("any mix is fine: name only, or several mains", async () => {

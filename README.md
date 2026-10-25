@@ -153,7 +153,7 @@ If the two lists disagree, the organiser view shows a warning naming the mismatc
 The page validates as guests go, and the server checks everything again before writing:
 
 - Only known dish IDs. Only the name is required; every dish is optional.
-- Quantities are whole numbers from 0 to 9. Egg yolks can't exceed larb portions.
+- Quantities are whole numbers from 0 to 9. Egg yolks (0–9, ฿20 each) need at least one larb in the order, but can outnumber the larb portions.
 - Name: 1–60 characters. Notes: up to 400. Control characters are stripped and whitespace is tidied.
 - Order IDs must be 16–64 letters and digits, and the page generates 24 random ones. Guests never receive other guests' orders or order IDs, so nobody can see or edit someone else's order.
 - Text starting with `=`, `+`, `-` or `@` is stored as plain text, so a guest can't put a formula into your Sheet.

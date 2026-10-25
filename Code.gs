@@ -45,7 +45,7 @@ const MENU = [
   { id: 'd_cold50',       course: 'side',  name: 'Cold Cut 50g', price: 150 },
   { id: 'd_cold100',      course: 'side',  name: 'Cold Cut 100g', price: 280 },
 ];
-// Raw egg yolk on the larb, charged per portion.
+// Raw egg yolk on the larb, charged per yolk. Any number up to LIMITS.qty, once the larb is ordered.
 const EGG = { dish: 's_larb', name: 'Raw egg yolk add-on', price: 20 };
 
 const LIMITS = { name: 60, notes: 400, qty: 9, orders: 150, body: 10000 };
@@ -169,7 +169,7 @@ function validateOrder_(o) {
   });
 
   const egg = checkQty_(o.egg == null ? 0 : o.egg, 'egg');
-  if (egg > (items[EGG.dish] || 0)) throw fail_('invalid', 'More egg yolks than larb portions.');
+  if (egg > 0 && !items[EGG.dish]) throw fail_('invalid', 'Egg yolks need at least one larb.');
 
   const notes = cleanText_(o.notes, true);
   if (notes.length > LIMITS.notes) throw fail_('invalid', 'Notes are too long (max ' + LIMITS.notes + ' characters).');

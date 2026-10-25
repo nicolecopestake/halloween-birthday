@@ -245,7 +245,7 @@ const POLL_MS = 20000;   // how often the page checks the deadline (and, for the
 // ── Menu ─────────────────────────────────────────────────────────────────────
 // Edit dishes and prices here. course: "main" | "share" | "side".
 // g = portion size, th = Thai name, sub = small note, hot = SPICY tag,
-// egg = price of the raw egg yolk add-on, charged per portion.
+// egg = price of the raw egg yolk add-on, charged per yolk (0–9 yolks, once the dish is ordered).
 // If you add, remove or reprice a dish, mirror the id and price in MENU in Code.gs.
 const MENU = [
   {course:"main", id:"m_shrimp",    n:"Creamy Shrimp Pasta", th:"พาสต้าซอสครีมกุ้ง", p:360, hot:true},
@@ -331,7 +331,7 @@ function cleanText(s, multiline){
 function clean(o){
   const items = {};
   MENU.forEach(d => { const q = Math.min(MAX_QTY, Math.max(0, (o.items || {})[d.id] | 0)); if (q) items[d.id] = q; });
-  const eggMax = EGG_DISH ? items[EGG_DISH.id] || 0 : 0;
+  const eggMax = EGG_DISH && items[EGG_DISH.id] ? MAX_QTY : 0;   // yolks need at least one larb
   return {name: cleanText(o.name, false), items, egg: Math.min(Math.max(0, o.egg | 0), eggMax), notes: cleanText(o.notes, true)};
 }
 const same = (a, b) => JSON.stringify(clean(a)) === JSON.stringify(clean(b));
@@ -398,10 +398,10 @@ function buildQty(boxId, list){
 function setQty(id, n){
   n = Math.max(0, Math.min(MAX_QTY, n));
   if (n) state.items[id] = n; else delete state.items[id];
-  if (EGG_DISH && id === EGG_DISH.id) state.egg = Math.min(state.egg, n);
+  if (EGG_DISH && id === EGG_DISH.id && !n) state.egg = 0;
   render();
 }
-function setEgg(n){ state.egg = Math.max(0, Math.min(state.items[EGG_DISH.id] || 0, n)); render(); }
+function setEgg(n){ state.egg = state.items[EGG_DISH.id] ? Math.max(0, Math.min(MAX_QTY, n)) : 0; render(); }
 function fillInputs(){ $("name").value = state.name; $("notes").value = state.notes; }
 
 // ── Rendering ────────────────────────────────────────────────────────────────
@@ -424,7 +424,7 @@ function render(){
     $("q_egg").textContent = state.egg;
     st.classList.toggle("on", state.egg > 0);
     st.children[0].disabled = state.egg === 0;
-    st.children[2].disabled = state.egg >= larb;
+    st.children[2].disabled = state.egg >= MAX_QTY;
   }
   const mine = clean(state);
   $("myTotal").textContent = baht(totalOf(mine));
@@ -558,7 +558,7 @@ function kitchenSummary(){
     .concat(noMain ? ["(" + noMain + " guest" + (noMain > 1 ? "s" : "") + " with no main)"] : []));
   const extraLine = d => {
     let s = qty(d.id) + " × " + label(d);
-    if (EGG_DISH && d.id === EGG_DISH.id && eggs) s += " (" + eggs + " with raw egg yolk)";
+    if (EGG_DISH && d.id === EGG_DISH.id && eggs) s += " (+ " + eggs + " raw egg yolk" + (eggs > 1 ? "s" : "") + ")";
     return s;
   };
   section("TO SHARE", SHARE.filter(d => qty(d.id)).map(extraLine));
