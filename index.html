@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cru Dinner Pre-Order</title>
+<meta name="description" content="Choose your dishes for the Cru group dinner.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F0EFEC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161514" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Jost:wght@400;500;600&family=Noto+Sans+Thai:wght@400&display=swap">
+<style>
+/* Layout: one narrow menu column like the printed Cru card, sticky order bar at the bottom, group tally below (organiser only) */
+:root{
+  --paper:#F0EFEC; --card:#F8F7F5; --ink:#1C1B1A; --muted:#6E6B67; --rule:#D6D3CE;
+  --claret:#7C1E2A; --claret-soft:#F1E1E2; --ok:#2F6B45;
+  --display:"Bodoni Moda","Didot","Bodoni 72",Georgia,serif;
+  --body:"Jost","Avenir Next","Helvetica Neue",Arial,sans-serif;
+  --thai:"Noto Sans Thai","Thonburi","Leelawadee UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#161514; --card:#1F1E1C; --ink:#ECEAE6; --muted:#A39F99; --rule:#34312E;
+  --claret:#E07A86; --claret-soft:#3A2226; --ok:#7FC79A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#161514; --card:#1F1E1C; --ink:#ECEAE6; --muted:#A39F99; --rule:#34312E;
+  --claret:#E07A86; --claret-soft:#3A2226; --ok:#7FC79A; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 140px}
+.wrap{max-width:640px;margin:0 auto}
+header{padding-block:40px 8px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.mark{font-family:var(--display);font-size:56px;line-height:.9;font-weight:500;letter-spacing:-.02em}
+.mark span{font-size:.55em;letter-spacing:.02em}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500}
+h1{font-family:var(--display);font-weight:500;font-size:22px;margin:4px 0 0;text-wrap:balance}
+.intro{color:var(--muted);max-width:60ch;margin:12px 0 0}
+.deadline{margin:10px 0 0;font-size:13px;letter-spacing:.06em;color:var(--claret);font-weight:500}
+.notice{margin-top:20px;padding:12px 14px;border:1px solid var(--claret);background:var(--claret-soft);border-radius:4px;font-size:14px}
+.small{font-size:13px;color:var(--muted);margin:4px 0 10px}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+fieldset:disabled{opacity:.6}
+.field{display:grid;gap:6px;margin-top:28px}
+.lbl,label.lbl{font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+input[type=text],input[type=datetime-local],textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;width:100%;min-width:0}
+textarea{min-height:72px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible,a:focus-visible,.opt:has(input:focus-visible){outline:2px solid var(--claret);outline-offset:2px}
+a{color:var(--claret)}
+section.course{margin-top:44px}
+.course h2{font-family:var(--display);font-weight:700;font-size:40px;letter-spacing:-.03em;line-height:1;margin:0;text-wrap:balance}
+.course .hint{color:var(--muted);font-size:13px;margin:6px 0 14px}
+.list{display:grid;border-top:1px solid var(--rule)}
+.row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--rule)}
+.row > div{min-width:0}
+.dish{font-weight:600;font-size:13.5px;letter-spacing:.09em;text-transform:uppercase;overflow-wrap:anywhere}
+.dish .g{font-weight:400;letter-spacing:.04em;text-transform:none;color:var(--muted);margin-left:6px}
+.chili{color:var(--claret);font-size:11px;letter-spacing:.08em;margin-left:6px;font-weight:600}
+.th{font-family:var(--thai);color:var(--muted);font-size:13px}
+.sub{font-size:12.5px;color:var(--muted);font-style:italic}
+.price{font-variant-numeric:tabular-nums;letter-spacing:.06em;font-size:14px;color:var(--muted);white-space:nowrap}
+.opt{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--rule);cursor:pointer}
+.opt > div{min-width:0}
+.opt input{accent-color:var(--claret);width:18px;height:18px;margin:0}
+.opt.sel .dish{color:var(--claret)}
+.right{display:flex;align-items:center;gap:14px}
+.step{display:flex;align-items:center;border:1px solid var(--rule);border-radius:999px;background:var(--card);flex:none}
+.step button{font:inherit;width:34px;height:34px;border:0;background:none;color:var(--ink);cursor:pointer;font-size:17px;border-radius:999px;touch-action:manipulation}
+.step button:disabled{opacity:.3;cursor:default}
+.step output{min-width:20px;text-align:center;font-variant-numeric:tabular-nums;font-weight:600}
+.step.on{border-color:var(--claret)}
+.addon{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:13px;margin-top:8px;padding:6px 6px 6px 10px;border-left:2px solid var(--claret)}
+.addon .step button{width:30px;height:30px}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--ink);color:var(--paper);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.bar .in{max-width:640px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px 12px;flex-wrap:wrap}
+.bar .sum{font-variant-numeric:tabular-nums}
+.bar .sum b{font-family:var(--display);font-size:22px;font-weight:500}
+.bar .st{font-size:12.5px;opacity:.75}
+.btn{font:inherit;font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:12.5px;padding:11px 18px;border-radius:999px;border:1px solid var(--paper);background:var(--paper);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.ghost{background:none;color:var(--paper)}
+.btn.ink{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.btn.line{background:none;border-color:var(--ink);color:var(--ink)}
+.btn.sm{padding:8px 14px;font-size:11.5px}
+.btn.armed{background:var(--claret);border-color:var(--claret);color:#fff}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.card{margin-top:28px;padding:16px;border:1px solid var(--rule);background:var(--card);border-radius:4px}
+.copyrow{display:flex;gap:8px}
+.copyrow input{font-size:13px;color:var(--muted)}
+.admin h2{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.02em;margin:2px 0 12px;line-height:1}
+.adm{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.adm input[type=datetime-local]{width:auto;flex:1 1 200px}
+.toggle{display:inline-flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;cursor:pointer}
+.toggle input{appearance:none;-webkit-appearance:none;width:42px;height:24px;border-radius:999px;background:var(--rule);position:relative;margin:0;cursor:pointer;flex:none;transition:background .2s}
+.toggle input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--paper);transition:transform .2s}
+.toggle input:checked{background:var(--claret)}
+.toggle input:checked::after{transform:translateX(18px)}
+details{margin-top:14px}
+summary{cursor:pointer;font-size:13px;color:var(--muted)}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:12px;max-height:360px;overflow:auto;margin:8px 0 0}
+#tally{margin-top:64px;padding-top:28px;border-top:3px double var(--rule)}
+#tally h2{font-family:var(--display);font-weight:700;font-size:40px;letter-spacing:-.03em;margin:0;line-height:1}
+.kpis{display:flex;gap:28px;flex-wrap:wrap;margin:14px 0 4px}
+.kpis div{display:grid}
+.kpis b{font-family:var(--display);font-size:30px;font-weight:500;font-variant-numeric:tabular-nums}
+.kpis span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.synced{font-size:12px;color:var(--muted);margin:0}
+h3{font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin:28px 0 8px;font-weight:600}
+.count{display:grid;grid-template-columns:1fr auto;gap:6px 8px;padding-block:7px;border-bottom:1px solid var(--rule);font-size:14px}
+.count b{font-variant-numeric:tabular-nums}
+.count.muted{color:var(--muted)}
+.bars{height:4px;background:var(--rule);border-radius:2px;grid-column:1/-1;overflow:hidden}
+.bars i{display:block;height:100%;background:var(--claret);transition:width .4s ease}
+.empty{color:var(--muted);font-style:italic;padding-block:10px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:8px 8px 8px 0;border-bottom:1px solid var(--rule);vertical-align:top;overflow-wrap:anywhere}
+th{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;padding-right:0}
+tr.me td{background:var(--claret-soft)}
+tr.me td:first-child{box-shadow:inset 3px 0 var(--claret);padding-left:8px}
+.mine{color:var(--claret);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-left:6px;font-weight:600}
+.flag{color:var(--claret);background:var(--claret-soft);padding:1px 6px;border-radius:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.muted{color:var(--muted)}
+@media (max-width:560px){
+  /* By-person table becomes one card per guest on phones */
+  thead{display:none}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{padding:10px 0;border-bottom:1px solid var(--rule)}
+  tr.me{padding-left:10px;background:var(--claret-soft);box-shadow:inset 3px 0 var(--claret)}
+  tr.me td{background:none}
+  tr.me td:first-child{box-shadow:none;padding-left:0}
+  td{border:0;padding:1px 0}
+  td:first-child{font-weight:600}
+  td[data-k]::before{content:attr(data-k) " · ";font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  td.n{text-align:left}
+  td.act{padding-top:6px}
+}
+@media (max-width:420px){.mark{font-size:44px}.course h2,#tally h2{font-size:34px}body{padding-bottom:170px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Group dinner · pre-order</div>
+      <h1>Choose your dishes for the night</h1>
+    </div>
+    <div class="mark" aria-label="Cru">C<span>RU</span></div>
+  </header>
+  <p class="intro">Pick one main, then add anything you'd like from the sharing plates and sides. Save your order and you can come back to change it any time. Prices are in Thai baht.</p>
+  <p class="deadline" id="deadline" hidden></p>
+  <div class="notice" id="notice" role="alert" hidden></div>
+
+  <section class="card admin" id="admin" hidden aria-labelledby="adminH">
+    <div class="eyebrow">Organiser view</div>
+    <h2 id="adminH">Admin</h2>
+    <div class="notice" id="menuWarn" hidden></div>
+    <div class="adm">
+      <label class="toggle"><input type="checkbox" id="dlOn" role="switch"><span>Order deadline</span></label>
+      <input type="datetime-local" id="dlAt" aria-label="Deadline date and time">
+    </div>
+    <p class="small" id="dlStatus" aria-live="polite"></p>
+    <div class="btns">
+      <button type="button" class="btn ink sm" id="copyKitchen">Copy kitchen summary</button>
+      <button type="button" class="btn line sm" id="closeNow">Close orders now</button>
+    </div>
+    <details><summary>Preview kitchen summary</summary><pre id="kitchen"></pre></details>
+  </section>
+
+  <form id="f" autocomplete="off">
+    <fieldset id="fs">
+      <legend hidden>Your order</legend>
+      <div class="field">
+        <label class="lbl" for="name">Your name</label>
+        <input type="text" id="name" maxlength="60" placeholder="First and last name" required autocomplete="name">
+      </div>
+
+      <section class="course">
+        <h2>Main</h2>
+        <p class="hint">Choose one.</p>
+        <div class="list" id="mains" role="radiogroup" aria-label="Main course"></div>
+      </section>
+
+      <section class="course">
+        <h2>To Share</h2>
+        <p class="hint">Optional. Add as many as you like.</p>
+        <div class="list" id="share"></div>
+      </section>
+
+      <section class="course">
+        <h2>Sides</h2>
+        <p class="hint">Optional.</p>
+        <div class="list" id="sides"></div>
+      </section>
+
+      <div class="field">
+        <label class="lbl" for="notes">Allergies or dietary needs</label>
+        <textarea id="notes" maxlength="400" placeholder="e.g. no shellfish, mild spice only"></textarea>
+      </div>
+    </fieldset>
+  </form>
+
+  <section class="card" id="mylink" hidden aria-labelledby="mylinkH">
+    <div class="lbl" id="mylinkH">Your edit link</div>
+    <p class="small">Open it on another phone or laptop to change your order. Keep it to yourself: anyone with this link can edit your order.</p>
+    <div class="copyrow">
+      <input type="text" id="editUrl" readonly aria-label="Your edit link">
+      <button type="button" class="btn line sm" id="copyLink">Copy</button>
+    </div>
+  </section>
+
+  <section id="tally" aria-labelledby="tallyH" hidden>
+    <div class="eyebrow">Live from everyone's orders</div>
+    <h2 id="tallyH">The Tally</h2>
+    <div class="kpis">
+      <div><b id="kPeople">0</b><span>Orders in</span></div>
+      <div><b id="kMains">0</b><span>Mains</span></div>
+      <div><b id="kTotal">฿0</b><span>Food total</span></div>
+    </div>
+    <p class="synced" id="synced"></p>
+    <h3>Mains</h3><div id="tMains"><div class="empty">No orders yet. Yours could be the first.</div></div>
+    <h3>Sharing plates &amp; sides</h3><div id="tExtras"><div class="empty">Nothing added yet.</div></div>
+    <h3>By person</h3><div id="tPeople"><div class="empty">Each saved order will be listed here.</div></div>
+  </section>
+</div>
+
+<div class="bar">
+  <div class="in">
+    <div class="sum"><div class="st" id="status" role="status">Add your name to save</div><b id="myTotal">฿0</b> <span class="st">your total</span></div>
+    <div class="btns">
+      <button type="button" class="btn ghost" id="remove" hidden>Remove</button>
+      <button type="button" class="btn" id="save" disabled>Save order</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Settings ─────────────────────────────────────────────────────────────────
+// Paste your Apps Script web app URL here. It ends in /exec.
+const API_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const POLL_MS = 20000;   // how often the page checks the deadline (and, for the organiser, refreshes the tally)
+
+// ── Menu ─────────────────────────────────────────────────────────────────────
+// Edit dishes and prices here. course: "main" | "share" | "side".
+// g = portion size, th = Thai name, sub = small note, hot = SPICY tag,
+// egg = price of the raw egg yolk add-on, charged per portion.
+// If you add, remove or reprice a dish, mirror the id and price in MENU in Code.gs.
+const MENU = [
+  {course:"main", id:"m_shrimp",    n:"Creamy Shrimp Pasta", th:"พาสต้าซอสครีมกุ้ง", p:360, hot:true},
+  {course:"main", id:"m_meatballs", n:"Spaghetti & Meatballs", th:"สปาเกตตี้มีตบอล", p:360},
+  {course:"main", id:"m_chicken",   n:"Grilled Chicken Thigh with Jaew & Nam Prik Kha", g:"250g", th:"สะโพกไก่ย่างหนังกรอบ กับแจ่วมะขามและน้ำพริกข่า", p:300},
+  {course:"main", id:"m_ribs",      n:"Braised Beef Short Ribs with Chimichurri", g:"200g", th:"เนื้อร่องซี่โครงตุ๋น กับน้ำจิ้มสไตล์อาร์เจนติน่า", p:300},
+  {course:"main", id:"m_picanha",   n:"Grilled Picanha w/ Nam Jim Jaew", g:"250g", th:"พิคานย่าย่างจิ้มแจ่ว", p:550},
+
+  {course:"share", id:"s_gougeres",     n:"Gougères", th:"ชีสพัฟสไตล์เบอกันดี", p:180},
+  {course:"share", id:"s_cashew",       n:"Sea Salt Roasted Cashew Nuts", th:"เม็ดมะม่วงหิมพานต์อบคั่วดอกเกลือ", p:120},
+  {course:"share", id:"s_cashew_spicy", n:"Spicy Roasted Cashew Nuts", th:"ยำเม็ดมะม่วงหิมพานต์", p:150, hot:true},
+  {course:"share", id:"s_bruschetta",   n:"Bruschetta", th:"ขนมปังหน้ามะเขือเทศสไตล์อิตาเลียน", p:190},
+  {course:"share", id:"s_shrimp_toast", n:"Cheesy Shrimp Toast", th:"ขนมปังหน้ากุ้งอบชีส", p:250},
+  {course:"share", id:"s_nanban",       n:"Chicken Nanban", th:"ไก่ทอดซอสนันบัง", p:260},
+  {course:"share", id:"s_meatball",     n:"Meatball w/ Spicy Sauce", th:"เนื้อปั้นก้อนซอสเผ็ด", p:260},
+  {course:"share", id:"s_tomato",       n:"Tomato Salad", th:"สลัดมะเขือเทศ", p:220},
+  {course:"share", id:"s_gambas",       n:"Gambas al Ajillo", th:"ทาปาสกุ้งสไตล์สเปน", p:360, hot:true},
+  {course:"share", id:"s_yukke",        n:"Beef Yukke", th:"ยุกเกะเนื้อ", p:280},
+  {course:"share", id:"s_larb",         n:"Signature Larb Tartare", th:"ลาบตาร์ทาร์แบบครูวๆ", p:260, hot:true, egg:20},
+  {course:"share", id:"s_platter_half", n:"Cru Platter · Half", sub:"2 cheese, 1 charcuterie", th:"รวมชีสและโคลคัต", p:360},
+  {course:"share", id:"s_platter_full", n:"Cru Platter · Full", sub:"3 cheese, 2 charcuterie", th:"รวมชีสและโคลคัต", p:550},
+
+  {course:"side", id:"d_tomato",    n:"Cherry Tomato", g:"100g", p:80},
+  {course:"side", id:"d_baguette",  n:"French Baguette", g:"100g", p:80},
+  {course:"side", id:"d_olive",     n:"Olive & Pickle", g:"50g", p:80},
+  {course:"side", id:"d_cheese50",  n:"Cheese", g:"50g", p:180},
+  {course:"side", id:"d_cheese100", n:"Cheese", g:"100g", p:300},
+  {course:"side", id:"d_cold50",    n:"Cold Cut", g:"50g", p:150},
+  {course:"side", id:"d_cold100",   n:"Cold Cut", g:"100g", p:280},
+];
+
+// ── Setup ────────────────────────────────────────────────────────────────────
+const MAINS = MENU.filter(d => d.course === "main");
+const SHARE = MENU.filter(d => d.course === "share");
+const SIDES = MENU.filter(d => d.course === "side");
+const EXTRAS = [...SHARE, ...SIDES];
+const ALL = Object.fromEntries(MENU.map(d => [d.id, d]));
+const EGG_DISH = MENU.find(d => d.egg);
+const NO_MAIN = "none", MAX_QTY = 9, ID_KEY = "cru-preorder:id";
+const label = d => d.n + (d.g ? " " + d.g : "");
+const baht = n => "฿" + n.toLocaleString("en-US");
+const $ = id => document.getElementById(id);
+const validId = id => typeof id === "string" && /^[A-Za-z0-9]{16,64}$/.test(id);
+
+// On localhost you can point the page at a mock server with ?api=http://localhost:8787/exec
+const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+const apiUrl = (LOCAL && new URLSearchParams(location.search).get("api")) || API_URL;
+const configured = /^https?:\/\//.test(apiUrl);
+
+const store = {
+  get(){ try { return localStorage.getItem(ID_KEY); } catch (e) { return null; } },
+  set(v){ try { v ? localStorage.setItem(ID_KEY, v) : localStorage.removeItem(ID_KEY); } catch (e) {} },
+};
+
+const blank = name => ({name: name || "", main: null, items: {}, egg: 0, notes: ""});
+let state = blank(), saved = null;
+let myId = validId(store.get()) ? store.get() : null;
+let adminKey = null;
+let orders = [], deadline = null, serverClosed = false, isAdmin = false, serverDishes = null;
+let loaded = false, loadError = false, saving = false, listSeq = 0, writeEpoch = 0, lastSync = null, skew = 0;
+
+// #order-ID adopts an order from another device; #admin-KEY opens the organiser view.
+(function readHash(){
+  let h = location.hash.slice(1);
+  try { h = decodeURIComponent(h); } catch (e) {}
+  if (h.startsWith("order-")) {
+    const id = h.slice(6);
+    if (validId(id)) { myId = id; store.set(id); }
+    history.replaceState(null, "", location.pathname + location.search);
+  } else if (h.startsWith("admin-")) {
+    adminKey = h.slice(6);
+  }
+})();
+addEventListener("hashchange", () => { if (/^#(order|admin)-/.test(location.hash)) location.reload(); });
+
+// ── Order maths ──────────────────────────────────────────────────────────────
+// Same normalisation as the server, so a saved order compares equal to what came back.
+function cleanText(s, multiline){
+  s = String(s || "").replace(/\r\n?/g, "\n").replace(/[\u0000-\u0009\u000B-\u001F\u007F]/g, "");
+  s = multiline ? s.replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n") : s.replace(/\s+/g, " ");
+  return s.trim();
+}
+function clean(o){
+  const items = {};
+  EXTRAS.forEach(d => { const q = Math.min(MAX_QTY, Math.max(0, (o.items || {})[d.id] | 0)); if (q) items[d.id] = q; });
+  const eggMax = EGG_DISH ? items[EGG_DISH.id] || 0 : 0;
+  return {name: cleanText(o.name, false), main: o.main || null, items, egg: Math.min(Math.max(0, o.egg | 0), eggMax), notes: cleanText(o.notes, true)};
+}
+const same = (a, b) => JSON.stringify(clean(a)) === JSON.stringify(clean(b));
+function totalOf(o){
+  let t = ALL[o.main] && ALL[o.main].course === "main" ? ALL[o.main].p : 0;
+  for (const id in o.items) if (ALL[id]) t += ALL[id].p * o.items[id];
+  if (EGG_DISH) t += EGG_DISH.egg * o.egg;
+  return t;
+}
+function extrasText(o){
+  return EXTRAS.filter(d => o.items[d.id]).map(d => {
+    const q = o.items[d.id];
+    let s = (q > 1 ? q + "× " : "") + label(d);
+    if (EGG_DISH && d.id === EGG_DISH.id && o.egg) s += " (+" + o.egg + " egg yolk" + (o.egg > 1 ? "s" : "") + ")";
+    return s;
+  }).join(", ");
+}
+
+// ── Building the menu ────────────────────────────────────────────────────────
+function el(tag, attrs = {}, kids = []){
+  const e = document.createElement(tag);
+  for (const k in attrs) {
+    if (k === "text") e.textContent = attrs[k];
+    else if (k === "cls") e.className = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  kids.forEach(c => c && e.append(c));
+  return e;
+}
+function dishText(d){
+  const t = el("div", {cls: "dish"}, [document.createTextNode(d.n)]);
+  if (d.g) t.append(el("span", {cls: "g", text: d.g}));
+  if (d.hot) t.append(el("span", {cls: "chili", text: "SPICY"}));
+  const w = el("div", {}, [t]);
+  if (d.sub) w.append(el("div", {cls: "sub", text: d.sub}));
+  if (d.th) w.append(el("div", {cls: "th", text: d.th, lang: "th"}));
+  return w;
+}
+function stepper(id, name, onChange){
+  const out = el("output", {id: "q_" + id, text: "0", "aria-label": name + " quantity"});
+  const minus = el("button", {type: "button", "aria-label": "Remove one " + name, text: "−"});
+  const plus = el("button", {type: "button", "aria-label": "Add one " + name, text: "+"});
+  minus.onclick = () => onChange(-1);
+  plus.onclick = () => onChange(1);
+  return el("div", {cls: "step", id: "st_" + id}, [minus, out, plus]);
+}
+function buildMains(){
+  const box = $("mains");
+  [...MAINS, {id: NO_MAIN, n: "No main for me"}].forEach(d => {
+    const inp = el("input", {type: "radio", name: "main", id: "main_" + d.id, value: d.id});
+    inp.addEventListener("change", () => { state.main = d.id; render(); });
+    box.append(el("label", {cls: "opt", for: "main_" + d.id, "data-id": d.id}, [inp, dishText(d), el("span", {cls: "price", text: d.p ? d.p + ".-" : ""})]));
+  });
+}
+function buildQty(boxId, list){
+  const box = $(boxId);
+  list.forEach(d => {
+    const left = dishText(d);
+    if (d.egg) {
+      const row = el("div", {cls: "addon", id: "eggrow"}, [
+        el("span", {}, [document.createTextNode("Raw egg yolk "), el("span", {cls: "price", text: "+" + d.egg + " each"})]),
+        stepper("egg", "raw egg yolk", n => setEgg(state.egg + n)),
+      ]);
+      row.hidden = true;
+      left.append(row);
+    }
+    const step = stepper(d.id, label(d), n => setQty(d.id, (state.items[d.id] || 0) + n));
+    box.append(el("div", {cls: "row"}, [left, el("div", {cls: "right"}, [el("span", {cls: "price", text: d.p + ".-"}), step])]));
+  });
+}
+function setQty(id, n){
+  n = Math.max(0, Math.min(MAX_QTY, n));
+  if (n) state.items[id] = n; else delete state.items[id];
+  if (EGG_DISH && id === EGG_DISH.id) state.egg = Math.min(state.egg, n);
+  render();
+}
+function setEgg(n){ state.egg = Math.max(0, Math.min(state.items[EGG_DISH.id] || 0, n)); render(); }
+function fillInputs(){ $("name").value = state.name; $("notes").value = state.notes; }
+
+// ── Rendering ────────────────────────────────────────────────────────────────
+const fmtDate = iso => new Date(iso).toLocaleString("en-GB", {weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"});
+const closedNow = () => serverClosed || (!!deadline && Date.now() + skew >= Date.parse(deadline));   // skew: server clock minus ours
+const writable = () => configured && (isAdmin || !closedNow());
+const ready = () => loaded || loadError || !myId;   // wait for a returning guest's order before editing
+
+function render(){
+  document.querySelectorAll("#mains .opt").forEach(l => {
+    const on = state.main === l.dataset.id;
+    l.classList.toggle("sel", on);
+    l.querySelector("input").checked = on;
+  });
+  EXTRAS.forEach(d => {
+    const q = state.items[d.id] || 0, st = $("st_" + d.id), [minus, , plus] = st.children;
+    $("q_" + d.id).textContent = q;
+    st.classList.toggle("on", q > 0);
+    minus.disabled = q === 0;
+    plus.disabled = q >= MAX_QTY;
+  });
+  if (EGG_DISH) {
+    const larb = state.items[EGG_DISH.id] || 0, st = $("st_egg");
+    $("eggrow").hidden = !larb;
+    $("q_egg").textContent = state.egg;
+    st.classList.toggle("on", state.egg > 0);
+    st.children[0].disabled = state.egg === 0;
+    st.children[2].disabled = state.egg >= larb;
+  }
+  const mine = clean(state);
+  $("myTotal").textContent = baht(totalOf(mine));
+  $("fs").disabled = !writable() || !ready();
+
+  const dirty = !saved || !same(state, saved);
+  const complete = mine.name && mine.main;
+  $("save").disabled = !writable() || !ready() || saving || !complete || !dirty;
+  $("save").textContent = saved ? "Update order" : "Save order";
+  $("remove").hidden = !saved || !writable();
+  $("remove").disabled = saving;
+
+  let s;
+  if (!configured) s = "Not connected yet";
+  else if (!ready()) s = "Loading your order…";
+  else if (!writable()) s = "Orders are closed";
+  else if (saving) s = "Saving…";
+  else if (!mine.name) s = "Add your name to save";
+  else if (!mine.main) s = "Choose a main (or ‘No main’)";
+  else if (saved && !dirty) s = "Saved ✓";
+  else s = "Unsaved changes";
+  $("status").textContent = s;
+
+  $("mylink").hidden = !(saved && myId);
+  if (saved && myId) $("editUrl").value = location.origin + location.pathname + location.search + "#order-" + myId;
+
+  const dl = $("deadline");
+  dl.hidden = !deadline;
+  if (deadline) dl.textContent = closedNow()
+    ? "Orders closed " + fmtDate(deadline) + ". Ask the organiser if you need a change."
+    : "Please order by " + fmtDate(deadline) + ".";
+}
+
+function renderTally(){
+  const list = orders.map(o => ({...clean(o), mine: !!o.mine, id: o.id}))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const mc = {}, xc = {};
+  let grand = 0, mains = 0, noMain = 0;
+  list.forEach(o => {
+    if (ALL[o.main] && ALL[o.main].course === "main") { mc[o.main] = (mc[o.main] || 0) + 1; mains++; }
+    else noMain++;
+    for (const k in o.items) xc[k] = (xc[k] || 0) + o.items[k];
+    if (o.egg) xc._egg = (xc._egg || 0) + o.egg;
+    grand += totalOf(o);
+  });
+  $("kPeople").textContent = list.length;
+  $("kMains").textContent = mains;
+  $("kTotal").textContent = baht(grand);
+
+  const counts = (box, map, dishes, emptyText, tail) => {
+    box.replaceChildren();
+    const rows = dishes.filter(d => map[d.id]).sort((a, b) => map[b.id] - map[a.id]);
+    if (!rows.length && !tail) { box.append(el("div", {cls: "empty", text: emptyText})); return; }
+    const max = Math.max(1, ...rows.map(d => map[d.id]));
+    rows.forEach(d => {
+      const bar = el("div", {cls: "bars", "aria-hidden": "true"}, [el("i")]);
+      bar.firstChild.style.width = (map[d.id] / max * 100) + "%";
+      box.append(el("div", {cls: "count"}, [el("span", {text: label(d)}), el("b", {text: "× " + map[d.id]}), bar]));
+    });
+    if (tail) box.append(tail);
+  };
+  counts($("tMains"), mc, MAINS, "No orders yet. Yours could be the first.",
+    noMain ? el("div", {cls: "count muted"}, [el("span", {text: "No main"}), el("b", {text: "× " + noMain})]) : null);
+  const eggRow = EGG_DISH ? [{id: "_egg", n: "Raw egg yolk add-on", g: "(larb)"}] : [];
+  counts($("tExtras"), xc, [...EXTRAS, ...eggRow], "Nothing added yet.");
+
+  const pb = $("tPeople");
+  pb.replaceChildren();
+  if (!list.length) { pb.append(el("div", {cls: "empty", text: "Each saved order will be listed here."})); return; }
+  const heads = ["Name", "Main", "Extras", "Dietary", "Total"].concat(isAdmin ? [""] : []);
+  const tb = el("tbody");
+  list.forEach(o => {
+    const name = el("td", {}, [document.createTextNode(o.name)]);
+    if (o.mine) name.append(el("span", {cls: "mine", text: "you"}));
+    const diet = el("td", {"data-k": "Dietary"}, [o.notes ? el("span", {cls: "flag", text: o.notes}) : el("span", {cls: "muted", text: "—"})]);
+    const tr = el("tr", {cls: o.mine ? "me" : ""}, [
+      name,
+      el("td", {"data-k": "Main", text: ALL[o.main] ? label(ALL[o.main]) : "No main"}),
+      el("td", {"data-k": "Extras", text: extrasText(o) || "—"}),
+      diet,
+      el("td", {cls: "n", "data-k": "Total", text: baht(totalOf(o))}),
+    ]);
+    if (isAdmin && o.id) {
+      const b = el("button", {type: "button", cls: "btn line sm", text: "Remove", "aria-label": "Remove order for " + o.name});
+      twoTap(b, "Remove", () => adminRemove(o.id));
+      tr.append(el("td", {cls: "act"}, [b]));
+    }
+    tb.append(tr);
+  });
+  pb.append(el("table", {}, [el("thead", {}, [el("tr", {}, heads.map(h => el("th", {text: h})))]), tb]));
+}
+
+function renderSynced(){
+  $("synced").textContent = !configured ? ""
+    : loadError ? "Couldn't refresh. Trying again every " + POLL_MS / 1000 + " seconds."
+    : lastSync ? "Updated " + lastSync.toLocaleTimeString("en-GB", {hour: "2-digit", minute: "2-digit", second: "2-digit"}) : "Loading…";
+}
+
+function renderAdmin(){
+  $("admin").hidden = !isAdmin;
+  $("tally").hidden = !isAdmin;   // guests only see their own order
+  if (!isAdmin) return;
+  const on = !!deadline;
+  $("dlOn").checked = on;
+  if (on && document.activeElement !== $("dlAt")) $("dlAt").value = toLocalInput(deadline);
+  $("dlStatus").textContent = !on ? "No deadline. Guests can save and change orders."
+    : closedNow() ? "Closed since " + fmtDate(deadline) + ". Guests can no longer save (you still can). Switch the deadline off to reopen."
+    : "Open until " + fmtDate(deadline) + ".";
+  $("closeNow").hidden = closedNow();
+  $("kitchen").textContent = kitchenSummary();
+  const ids = MENU.map(d => d.id);
+  const missing = serverDishes ? ids.filter(id => !serverDishes.includes(id)) : [];
+  const extra = serverDishes ? serverDishes.filter(id => !ids.includes(id)) : [];
+  $("menuWarn").hidden = !missing.length && !extra.length;
+  $("menuWarn").textContent = "The menu in index.html and Code.gs don't match. "
+    + (missing.length ? "Missing from Code.gs: " + missing.join(", ") + ". " : "")
+    + (extra.length ? "Only in Code.gs: " + extra.join(", ") + "." : "");
+}
+
+function kitchenSummary(){
+  const list = orders.map(clean).sort((a, b) => a.name.localeCompare(b.name));
+  const count = id => list.reduce((n, o) => n + (o.main === id ? 1 : 0), 0);
+  const qty = id => list.reduce((n, o) => n + (o.items[id] || 0), 0);
+  const eggs = list.reduce((n, o) => n + o.egg, 0);
+  const noMain = list.filter(o => !ALL[o.main]).length;
+  const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
+  const lines = ["CRU · GROUP DINNER PRE-ORDER", plural(list.length, "guest") + " · " + plural(list.length - noMain, "main"), ""];
+  const section = (title, rows) => { if (rows.length) lines.push(title, ...rows, ""); };
+  section("MAINS", MAINS.filter(d => count(d.id)).map(d => count(d.id) + " × " + label(d))
+    .concat(noMain ? ["(" + noMain + " guest" + (noMain > 1 ? "s" : "") + " with no main)"] : []));
+  const extraLine = d => {
+    let s = qty(d.id) + " × " + label(d);
+    if (EGG_DISH && d.id === EGG_DISH.id && eggs) s += " (" + eggs + " with raw egg yolk)";
+    return s;
+  };
+  section("TO SHARE", SHARE.filter(d => qty(d.id)).map(extraLine));
+  section("SIDES", SIDES.filter(d => qty(d.id)).map(extraLine));
+  section("DIETARY NOTES", list.filter(o => o.notes).map(o => o.name + ": " + o.notes.replace(/\n+/g, " / ")));
+  section("MAINS BY GUEST", list.map(o => o.name + ": " + (ALL[o.main] ? label(ALL[o.main]) : "no main")));
+  lines.push("Food total: " + baht(list.reduce((n, o) => n + totalOf(o), 0)) + " (before drinks and service)");
+  return lines.join("\n");
+}
+
+function notice(msg){ const n = $("notice"); n.textContent = msg || ""; n.hidden = !msg; }
+function toLocalInput(iso){ const d = new Date(iso); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); }
+
+// ── Talking to the Apps Script ───────────────────────────────────────────────
+// Content-Type text/plain keeps this a "simple" CORS request, so the browser sends it
+// straight away instead of a preflight OPTIONS request, which Apps Script can't answer.
+async function api(action, payload = {}){
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 20000);
+  let res;
+  try {
+    res = await fetch(apiUrl, {
+      method: "POST",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify({action, ...payload, ...(adminKey ? {key: adminKey} : {})}),
+      redirect: "follow",
+      signal: ctl.signal,
+    });
+  } catch (e) {
+    throw Object.assign(new Error("Network error"), {code: "network"});
+  } finally { clearTimeout(t); }
+  let data;
+  try { data = await res.json(); }
+  catch (e) { throw Object.assign(new Error("Unexpected reply"), {code: "bad_response"}); }
+  if (!data || !data.ok) throw Object.assign(new Error((data && data.message) || "Error"), {code: (data && data.error) || "error"});
+  return data;
+}
+
+/** Takes in a list reply. adopt: replace the form with the server copy of my order. */
+function apply(d, adopt){
+  orders = d.orders || [];
+  deadline = d.deadline || null;
+  serverClosed = !!d.closed;
+  isAdmin = !!d.admin;
+  serverDishes = d.dishIds || null;
+  if (d.serverTime) skew = Date.parse(d.serverTime) - Date.now();
+  if (d.badKey) notice("This admin link isn't valid. Run showSettings() in the Apps Script editor to see the right one.");
+  const me = d.me ? clean(d.me) : null;
+  if (adopt && me) { state = JSON.parse(JSON.stringify(me)); fillInputs(); }
+  saved = me;
+  loaded = true; loadError = false; lastSync = new Date();
+  renderTally(); renderAdmin(); render(); renderSynced();
+}
+
+async function refresh(){
+  if (!configured) return;
+  const seq = ++listSeq, epoch = writeEpoch;
+  const wasDirty = saved ? !same(state, saved) : false;
+  try {
+    const d = await api("list", myId ? {id: myId} : {});
+    if (seq !== listSeq || epoch !== writeEpoch) return;   // a newer request or a save overtook this one
+    apply(d, !loaded || !wasDirty);
+  } catch (e) {
+    if (seq !== listSeq) return;
+    loadError = true;
+    if (!loaded) notice("Couldn't reach the order sheet. Check your connection; the page will keep trying.");
+    render(); renderSynced();
+  }
+}
+
+function writeError(e, what){
+  if (e.code === "closed") { serverClosed = true; notice("Orders are closed, so your " + what + " didn't go through. Ask the organiser if you need a change."); refresh(); }
+  else if (e.code === "invalid") notice("Your order wasn't saved: " + e.message);
+  else if (e.code === "busy") notice("The order sheet is busy. Try again in a moment.");
+  else if (e.code === "network" || e.code === "bad_response") notice("Couldn't reach the order sheet. Check your connection and try again.");
+  else notice("That didn't work (" + e.code + "). Try again in a moment.");
+}
+
+async function save(){
+  if ($("save").disabled) return;
+  if (!myId) { myId = newId(); store.set(myId); }
+  const sent = clean(state);
+  saving = true; writeEpoch++; render();
+  try {
+    const d = await api("save", {id: myId, order: sent});
+    writeEpoch++;
+    notice("");
+    apply(d, same(state, sent));   // keep anything typed while the save was in flight
+  } catch (e) { writeEpoch++; writeError(e, "order"); }
+  saving = false; render();
+}
+
+async function removeOrder(){
+  saving = true; writeEpoch++; render();
+  try {
+    const d = await api("remove", {id: myId});
+    writeEpoch++;
+    store.set(null); myId = null;
+    state = blank(state.name); fillInputs();
+    apply(d, false);
+    notice("Your order was removed.");
+  } catch (e) { writeEpoch++; writeError(e, "removal"); }
+  saving = false; render();
+}
+
+async function adminRemove(target){
+  try { writeEpoch++; const d = await api("adminRemove", {target, ...(myId ? {id: myId} : {})}); writeEpoch++; apply(d, false); }
+  catch (e) { writeEpoch++; writeError(e, "removal"); }
+}
+
+async function setDeadline(value){
+  try { writeEpoch++; const d = await api("setDeadline", {deadline: value, ...(myId ? {id: myId} : {})}); writeEpoch++; apply(d, false); }
+  catch (e) { writeEpoch++; writeError(e, "change"); renderAdmin(); }
+}
+
+function newId(){
+  const abc = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  return Array.from(crypto.getRandomValues(new Uint8Array(24)), x => abc[x % abc.length]).join("");
+}
+
+/** First tap arms the button, a second tap within 4 seconds confirms. No confirm() dialogs. */
+function twoTap(btn, idleText, action){
+  let timer = null;
+  const disarm = () => { clearTimeout(timer); btn.classList.remove("armed"); btn.textContent = idleText; delete btn.dataset.armed; };
+  btn.addEventListener("click", () => {
+    if (!btn.dataset.armed) {
+      btn.dataset.armed = "1"; btn.classList.add("armed"); btn.textContent = "Tap again to confirm";
+      timer = setTimeout(disarm, 4000);
+      return;
+    }
+    disarm(); action();
+  });
+  btn.addEventListener("blur", () => { if (btn.dataset.armed) setTimeout(() => { if (document.activeElement !== btn) disarm(); }, 150); });
+}
+
+async function copyText(text, btn){
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; }
+  catch (e) {
+    const ta = el("textarea", {readonly: ""});
+    ta.value = text; ta.style.cssText = "position:fixed;top:0;opacity:0";
+    document.body.append(ta); ta.select();
+    try { ok = document.execCommand("copy"); } catch (e2) {}
+    ta.remove();
+  }
+  const old = btn.textContent;
+  btn.textContent = ok ? "Copied ✓" : "Copy failed: select the text";
+  setTimeout(() => { btn.textContent = old; }, 2000);
+}
+
+// ── Wiring ───────────────────────────────────────────────────────────────────
+buildMains(); buildQty("share", SHARE); buildQty("sides", SIDES);
+$("name").addEventListener("input", e => { state.name = e.target.value; render(); });
+$("notes").addEventListener("input", e => { state.notes = e.target.value; render(); });
+$("save").onclick = save;
+twoTap($("remove"), "Remove", removeOrder);
+$("f").addEventListener("submit", e => { e.preventDefault(); save(); });
+$("copyLink").onclick = () => copyText($("editUrl").value, $("copyLink"));
+$("copyKitchen").onclick = () => copyText(kitchenSummary(), $("copyKitchen"));
+$("dlOn").addEventListener("change", () => {
+  if (!$("dlOn").checked) return setDeadline(null);
+  if (!$("dlAt").value) { $("dlOn").checked = false; $("dlStatus").textContent = "Pick a date and time first."; $("dlAt").focus(); return; }
+  setDeadline(new Date($("dlAt").value).toISOString());
+});
+$("dlAt").addEventListener("change", () => { if ($("dlOn").checked && $("dlAt").value) setDeadline(new Date($("dlAt").value).toISOString()); });
+twoTap($("closeNow"), "Close orders now", () => setDeadline(new Date().toISOString()));
+
+if (!configured) notice("This page isn't connected to the order sheet yet. Paste your Apps Script web app URL into API_URL near the top of index.html.");
+render(); renderSynced();
+
+let timer = null;
+function schedule(){ clearTimeout(timer); if (!document.hidden) timer = setTimeout(() => refresh().then(schedule), POLL_MS); }
+document.addEventListener("visibilitychange", () => { if (document.hidden) clearTimeout(timer); else refresh().then(schedule); });
+refresh().then(schedule);
+</script>
+</body>
+</html>
