@@ -246,9 +246,19 @@ function readOrders_(sh) {
   values.slice(1).forEach((r, i) => {
     const id = String(r[iId] || '');
     if (!id) return;
-    try { out.push({ row: i + 2, id: id, data: JSON.parse(r[iData]) }); } catch (err) { /* skip hand-edited rows */ }
+    try { out.push({ row: i + 2, id: id, data: upgrade_(JSON.parse(r[iData])) }); } catch (err) { /* skip hand-edited rows */ }
   });
   return out;
+}
+
+/** Orders saved before mains became quantities had a single "main" field. Fold it into items. */
+function upgrade_(o) {
+  if ('main' in o) {
+    o.items = o.items || {};
+    if (BY_ID[o.main]) o.items[o.main] = (o.items[o.main] || 0) + 1;
+    delete o.main;
+  }
+  return o;
 }
 
 function lastDataRow_(sh) { return Math.max(1, sh.getLastRow()); }
