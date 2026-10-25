@@ -47,7 +47,6 @@ const MENU = [
 ];
 // Raw egg yolk on the larb, charged per portion.
 const EGG = { dish: 's_larb', name: 'Raw egg yolk add-on', price: 20 };
-const NO_MAIN = 'none';
 
 const LIMITS = { name: 60, notes: 400, qty: 9, orders: 150, body: 10000 };
 const ORDERS = 'Orders';
@@ -55,8 +54,7 @@ const TOTALS = 'Dish totals';
 
 const BY_ID = {};
 MENU.forEach(d => { BY_ID[d.id] = d; });
-const MAINS = MENU.filter(d => d.course === 'main');
-const EXTRAS = MENU.filter(d => d.course !== 'main');
+const COURSE_LABEL = { main: 'Main', share: 'To share', side: 'Side' };
 
 // ── Web app entry points ─────────────────────────────────────────────────────
 
@@ -161,14 +159,11 @@ function validateOrder_(o) {
   if (!name) throw fail_('invalid', 'Name is required.');
   if (name.length > LIMITS.name) throw fail_('invalid', 'Name is too long (max ' + LIMITS.name + ' characters).');
 
-  const main = String(o.main || '');
-  if (main !== NO_MAIN && !(BY_ID[main] && BY_ID[main].course === 'main')) throw fail_('invalid', 'Choose a main, or "No main".');
-
   const items = {};
   const raw = o.items == null ? {} : o.items;
   if (typeof raw !== 'object' || Array.isArray(raw)) throw fail_('invalid', 'Items must be an object.');
   Object.keys(raw).forEach(k => {
-    if (!BY_ID[k] || BY_ID[k].course === 'main') throw fail_('invalid', 'Unknown dish: ' + String(k).slice(0, 40));
+    if (!BY_ID[k]) throw fail_('invalid', 'Unknown dish: ' + String(k).slice(0, 40));
     const q = checkQty_(raw[k], k);
     if (q > 0) items[k] = q;
   });
@@ -179,7 +174,7 @@ function validateOrder_(o) {
   const notes = cleanText_(o.notes, true);
   if (notes.length > LIMITS.notes) throw fail_('invalid', 'Notes are too long (max ' + LIMITS.notes + ' characters).');
 
-  return { name: name, main: main, items: items, egg: egg, notes: notes };
+  return { name: name, items: items, egg: egg, notes: notes };
 }
 
 function checkQty_(v, what) {
@@ -218,8 +213,8 @@ function isClosed_() {
 // ── Sheet storage ────────────────────────────────────────────────────────────
 
 function columns_() {
-  return ['Name', 'Main']
-    .concat(EXTRAS.map(d => d.name))
+  return ['Name']
+    .concat(MENU.map(d => d.name))
     .concat([EGG.name, 'Dietary notes', 'Total (THB)', 'Updated', 'Created', 'Order ID', 'Data']);
 }
 
@@ -259,9 +254,8 @@ function readOrders_(sh) {
 function lastDataRow_(sh) { return Math.max(1, sh.getLastRow()); }
 
 function writeRow_(sh, row, id, o) {
-  const main = o.main === NO_MAIN ? 'No main' : BY_ID[o.main] ? BY_ID[o.main].name : o.main;
-  const vals = [asText_(o.name), main]
-    .concat(EXTRAS.map(d => o.items[d.id] || ''))
+  const vals = [asText_(o.name)]
+    .concat(MENU.map(d => o.items[d.id] || ''))
     .concat([o.egg || '', asText_(o.notes), totalOf_(o), new Date(o.updated), new Date(o.created), id, JSON.stringify(o)]);
   sh.getRange(row, 1, 1, vals.length).setValues([vals]);
 }
@@ -275,13 +269,13 @@ function deleteById_(id) {
 }
 
 function totalOf_(o) {
-  let t = o.main && BY_ID[o.main] ? BY_ID[o.main].price : 0;
+  let t = 0;
   Object.keys(o.items || {}).forEach(k => { if (BY_ID[k]) t += BY_ID[k].price * o.items[k]; });
   return t + EGG.price * (o.egg || 0);
 }
 
 function publicOrder_(o) {
-  return { name: o.name, main: o.main, items: o.items || {}, egg: o.egg || 0, notes: o.notes || '', updated: o.updated };
+  return { name: o.name, items: o.items || {}, egg: o.egg || 0, notes: o.notes || '', updated: o.updated };
 }
 
 /** A leading = + - @ would make Sheets treat a guest's text as a formula. The apostrophe forces plain text. */
@@ -310,7 +304,6 @@ function rebuildAll_() {
 function buildTotals_(ss) {
   const cols = columns_();
   const col = name => colLetter_(cols.indexOf(name) + 1);
-  const mainCol = col('Main');
   let sh = ss.getSheetByName(TOTALS);
   if (!sh) sh = ss.insertSheet(TOTALS);
   sh.clear();
@@ -318,13 +311,11 @@ function buildTotals_(ss) {
   const rows = [['Course', 'Dish', 'Price (THB)', 'Count', 'Subtotal (THB)']];
   const add = (course, name, price, count) => {
     const r = rows.length + 1;
-    rows.push([course, name, price, count, price === '' ? '' : '=C' + r + '*D' + r]);
+    rows.push([course, name, price, count, '=C' + r + '*D' + r]);
   };
-  MAINS.forEach(d => add('Main', d.name, d.price, '=COUNTIF(' + ORDERS + '!' + mainCol + '2:' + mainCol + ',B' + (rows.length + 1) + ')'));
-  add('Main', 'No main', '', '=COUNTIF(' + ORDERS + '!' + mainCol + '2:' + mainCol + ',B' + (rows.length + 1) + ')');
-  EXTRAS.forEach(d => {
+  MENU.forEach(d => {
     const c = col(d.name);
-    add(d.course === 'share' ? 'To share' : 'Side', d.name, d.price, '=SUM(' + ORDERS + '!' + c + '2:' + c + ')');
+    add(COURSE_LABEL[d.course], d.name, d.price, '=SUM(' + ORDERS + '!' + c + '2:' + c + ')');
   });
   const e = col(EGG.name);
   add('Add-on', EGG.name, EGG.price, '=SUM(' + ORDERS + '!' + e + '2:' + e + ')');

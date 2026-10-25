@@ -91,7 +91,7 @@ const API_URL = "https://script.google.com/macros/s/AKfy…/exec";
 
 ## Using it
 
-**Guests** fill in their name, choose a main (or "No main for me"), add sharing plates and sides, and press **Save order**. The page stores a random order ID on their phone, so when they come back it opens their order ready to change. After saving, they see a private **edit link** (`…#order-ID`) they can copy to edit from another device. **Remove** asks for a second tap to confirm.
+**Guests** fill in their name, add any mix of mains, sharing plates and sides (all optional, up to 9 of each), and press **Save order**. The page stores a random order ID on their phone, so when they come back it opens their order ready to change. After saving, they see a private **edit link** (`…#order-ID`) they can copy to edit from another device. **Remove** asks for a second tap to confirm.
 
 **Organiser view** (`#admin-KEY`) shows the live tally below the form (orders in, mains, food total, counts per dish with egg yolks, and a by-person table with dietary notes). Guests don't see it. It also adds a panel above the form:
 
@@ -102,8 +102,8 @@ const API_URL = "https://script.google.com/macros/s/AKfy…/exec";
 
 **The Sheet**
 
-- **Orders** has one row per guest: name, main, a column per extra, egg yolks, dietary notes, total, timestamps and order ID. A hidden **Data** column holds the exact saved order, and the script treats it as the source of truth. Read the other columns freely, but make changes through the page: hand edits are overwritten the next time that guest saves.
-- **Dish totals** has a count and subtotal per dish, all formulas over the Orders tab (`COUNTIF` for mains, `SUM` for extras), plus orders in, food total, and a check against the per-guest totals.
+- **Orders** has one row per guest: name, a column per dish (mains included), egg yolks, dietary notes, total, timestamps and order ID. A hidden **Data** column holds the exact saved order, and the script treats it as the source of truth. Read the other columns freely, but make changes through the page: hand edits are overwritten the next time that guest saves.
+- **Dish totals** has a count and subtotal per dish, all `SUM` formulas over the Orders tab, plus orders in, food total, and a check against the per-guest totals.
 
 ## Admin key and deadline settings
 
@@ -152,7 +152,7 @@ If the two lists disagree, the organiser view shows a warning naming the mismatc
 
 The page validates as guests go, and the server checks everything again before writing:
 
-- Only known dish IDs: mains in the main slot, everything else as extras.
+- Only known dish IDs. Only the name is required; every dish is optional.
 - Quantities are whole numbers from 0 to 9. Egg yolks can't exceed larb portions.
 - Name: 1–60 characters. Notes: up to 400. Control characters are stripped and whitespace is tidied.
 - Order IDs must be 16–64 letters and digits, and the page generates 24 random ones. Guests never receive other guests' orders or order IDs, so nobody can see or edit someone else's order.

@@ -14,7 +14,7 @@ let passed = 0;
 const ok = (name, fn) => fn().then(() => { passed++; console.log("  ✓", name); });
 
 const A = id("Anna"), B = id("Ben"), C = id("Chai");
-const anna = { name: "  Anna   Smith ", main: "m_shrimp", items: { s_larb: 2, s_gougeres: 1, d_baguette: 3 }, egg: 1, notes: "No  peanuts\n\n\n\nplease" };
+const anna = { name: "  Anna   Smith ", items: { m_shrimp: 1, s_larb: 2, s_gougeres: 1, d_baguette: 3 }, egg: 1, notes: "No  peanuts\n\n\n\nplease" };
 
 await run("resetOrders");
 await run("clearDeadline");
@@ -29,7 +29,8 @@ await ok("save normalises text and returns me", async () => {
   assert.equal(d.ok, true, JSON.stringify(d));
   assert.equal(d.me.name, "Anna Smith");
   assert.equal(d.me.notes, "No peanuts\n\nplease");
-  assert.deepEqual(d.me.items, { s_larb: 2, s_gougeres: 1, d_baguette: 3 });
+  assert.deepEqual(d.me.items, { m_shrimp: 1, s_larb: 2, s_gougeres: 1, d_baguette: 3 });
+  assert.ok(!("main" in d.me));
   assert.equal(d.me.egg, 1);
   assert.deepEqual(d.orders, [], "guests don't get other orders");
   const a = await call({ action: "list", id: A, key: KEY });
@@ -38,16 +39,14 @@ await ok("save normalises text and returns me", async () => {
 
 const bad = [
   ["unknown dish", { ...anna, items: { s_nope: 1 } }],
-  ["main id used as an extra", { ...anna, items: { m_ribs: 1 } }],
+  ["unknown main", { ...anna, items: { m_lobster: 1 } }],
+  ["main quantity 10", { ...anna, items: { m_ribs: 10 } }],
   ["quantity 10", { ...anna, items: { s_gougeres: 10 } }],
   ["negative quantity", { ...anna, items: { s_gougeres: -1 } }],
   ["fractional quantity", { ...anna, items: { s_gougeres: 1.5 } }],
   ["quantity as string", { ...anna, items: { s_gougeres: "2" } }],
   ["more eggs than larb", { ...anna, items: { s_larb: 1 }, egg: 2 }],
   ["egg without larb", { ...anna, items: {}, egg: 1 }],
-  ["unknown main", { ...anna, main: "m_lobster" }],
-  ["missing main", { ...anna, main: "" }],
-  ["extra used as main", { ...anna, main: "s_larb" }],
   ["empty name", { ...anna, name: "   " }],
   ["name too long", { ...anna, name: "x".repeat(61) }],
   ["notes too long", { ...anna, notes: "x".repeat(401) }],
@@ -70,12 +69,27 @@ await ok("rejects bad ids, actions and bodies", async () => {
 });
 
 await ok("name 60 chars and notes 400 chars are accepted; Thai text works", async () => {
-  const d = await call({ action: "save", id: B, order: { name: "B".repeat(60), main: "none", items: { s_cashew: 9 }, egg: 0, notes: "ไม่ทานเผ็ด " + "x".repeat(389) } });
+  const d = await call({ action: "save", id: B, order: { name: "B".repeat(60), items: { s_cashew: 9 }, egg: 0, notes: "ไม่ทานเผ็ด " + "x".repeat(389) } });
   assert.equal(d.ok, true, JSON.stringify(d)); assert.equal(d.me.notes.length, 400);
 });
 
+await ok("any mix is fine: name only, or several mains", async () => {
+  const e = id("Empty"), m = id("Multi");
+  const d1 = await call({ action: "save", id: e, order: { name: "Just a name" } });
+  assert.equal(d1.ok, true, JSON.stringify(d1)); assert.deepEqual(d1.me.items, {});
+  const d2 = await call({ action: "save", id: m, order: { name: "Hungry", items: { m_picanha: 2, m_shrimp: 1 } } });
+  assert.equal(d2.ok, true); assert.deepEqual(d2.me.items, { m_picanha: 2, m_shrimp: 1 });
+  const orders = (await sheet()).find(s => s.name === "Orders");
+  const head = orders.rows[0];
+  const row = orders.rows.find(r => r[0] === "Hungry");
+  assert.equal(row[head.indexOf("Grilled Picanha w/ Nam Jim Jaew 250g")], 2);
+  assert.equal(row[head.indexOf("Total (THB)")], 1460);
+  await call({ action: "adminRemove", key: KEY, target: e });
+  await call({ action: "adminRemove", key: KEY, target: m });
+});
+
 await ok("guest text can't become a formula in the Sheet", async () => {
-  const d = await call({ action: "save", id: C, order: { name: "=IMPORTXML(\"http://x\")", main: "m_picanha", items: { s_larb: 1 }, egg: 1, notes: "+1 gluten free" } });
+  const d = await call({ action: "save", id: C, order: { name: "=IMPORTXML(\"http://x\")", items: { m_picanha: 1, s_larb: 1 }, egg: 1, notes: "+1 gluten free" } });
   assert.equal(d.ok, true);
   const orders = (await sheet()).find(s => s.name === "Orders");
   assert.equal(orders.formulaCount, 0);
@@ -86,7 +100,7 @@ await ok("guest text can't become a formula in the Sheet", async () => {
 await ok("guests only get their own order; GET returns no orders", async () => {
   const d = await call({ action: "list", id: C });
   assert.deepEqual(d.orders, []);
-  assert.equal(d.me.main, "m_picanha");
+  assert.equal(d.me.items.m_picanha, 1);
   assert.ok(!("id" in d.me));
   const g = await (await fetch(API + "/exec")).json();
   assert.equal(g.ok, true); assert.deepEqual(g.orders, []); assert.equal(g.me, null);
@@ -99,9 +113,9 @@ await ok("update keeps one row and the created time", async () => {
   const head = before.rows[0];
   const createdBefore = before.rows.find(r => r[head.indexOf("Order ID")] === A)[head.indexOf("Created")];
   await new Promise(r => setTimeout(r, 20));
-  const d = await call({ action: "save", id: A, order: { ...anna, main: "m_ribs", items: { s_larb: 3 }, egg: 3 } });
+  const d = await call({ action: "save", id: A, order: { ...anna, items: { m_ribs: 1, s_larb: 3 }, egg: 3 } });
   assert.equal((await call({ action: "list", key: KEY })).orders.length, 3);
-  assert.equal(d.me.main, "m_ribs"); assert.equal(d.me.egg, 3);
+  assert.deepEqual(d.me.items, { m_ribs: 1, s_larb: 3 }); assert.equal(d.me.egg, 3);
   const after = (await sheet()).find(s => s.name === "Orders");
   const rows = after.rows.filter(r => r[head.indexOf("Order ID")] === A);
   assert.equal(rows.length, 1);
@@ -118,7 +132,7 @@ await ok("Dish totals formulas match the orders", async () => {
   assert.equal(get("Braised Beef Short Ribs with Chimichurri 200g", 3), 1);
   assert.equal(get("Grilled Picanha w/ Nam Jim Jaew 250g", 3), 1);
   assert.equal(get("Creamy Shrimp Pasta", 3), 0);
-  assert.equal(get("No main", 3), 1);
+  assert.equal(t.find(r => r[1] === "No main"), undefined);
   assert.equal(get("Signature Larb Tartare", 3), 4);
   assert.equal(get("Signature Larb Tartare", 4), 1040);
   assert.equal(get("Raw egg yolk add-on", 3), 4);
@@ -149,7 +163,7 @@ await ok("deadline closes saving and removing for guests, not for the admin", as
   const future = new Date(Date.now() + 3600e3).toISOString();
   const f = await call({ action: "setDeadline", key: KEY, deadline: future });
   assert.equal(f.closed, false);
-  assert.equal((await call({ action: "save", id: A, order: { ...anna, items: { s_larb: 3 }, egg: 3, main: "m_ribs" } })).ok, true);
+  assert.equal((await call({ action: "save", id: A, order: { ...anna, items: { m_ribs: 1, s_larb: 3 }, egg: 3 } })).ok, true);
   assert.equal((await call({ action: "setDeadline", key: KEY, deadline: "not a date" })).error, "invalid");
   assert.equal((await call({ action: "setDeadline", key: KEY, deadline: null })).deadline, null);
 });

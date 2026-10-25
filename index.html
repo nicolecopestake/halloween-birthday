@@ -47,7 +47,7 @@ fieldset:disabled{opacity:.6}
 .lbl,label.lbl{font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
 input[type=text],input[type=datetime-local],textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;width:100%;min-width:0}
 textarea{min-height:72px;resize:vertical}
-input:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible,a:focus-visible,.opt:has(input:focus-visible){outline:2px solid var(--claret);outline-offset:2px}
+input:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--claret);outline-offset:2px}
 a{color:var(--claret)}
 section.course{margin-top:44px}
 .course h2{font-family:var(--display);font-weight:700;font-size:40px;letter-spacing:-.03em;line-height:1;margin:0;text-wrap:balance}
@@ -61,10 +61,6 @@ section.course{margin-top:44px}
 .th{font-family:var(--thai);color:var(--muted);font-size:13px}
 .sub{font-size:12.5px;color:var(--muted);font-style:italic}
 .price{font-variant-numeric:tabular-nums;letter-spacing:.06em;font-size:14px;color:var(--muted);white-space:nowrap}
-.opt{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--rule);cursor:pointer}
-.opt > div{min-width:0}
-.opt input{accent-color:var(--claret);width:18px;height:18px;margin:0}
-.opt.sel .dish{color:var(--claret)}
 .right{display:flex;align-items:center;gap:14px}
 .step{display:flex;align-items:center;border:1px solid var(--rule);border-radius:999px;background:var(--card);flex:none}
 .step button{font:inherit;width:34px;height:34px;border:0;background:none;color:var(--ink);cursor:pointer;font-size:17px;border-radius:999px;touch-action:manipulation}
@@ -152,7 +148,7 @@ tr.me td:first-child{box-shadow:inset 3px 0 var(--claret);padding-left:8px}
     </div>
     <div class="mark" aria-label="Cru">C<span>RU</span></div>
   </header>
-  <p class="intro">Pick one main, then add anything you'd like from the sharing plates and sides. Save your order and you can come back to change it any time. Prices are in Thai baht.</p>
+  <p class="intro">Order whatever you like: mains, sharing plates and sides are all optional. Save your order and you can come back to change it any time. Prices are in Thai baht.</p>
   <p class="deadline" id="deadline" hidden></p>
   <div class="notice" id="notice" role="alert" hidden></div>
 
@@ -182,8 +178,8 @@ tr.me td:first-child{box-shadow:inset 3px 0 var(--claret);padding-left:8px}
 
       <section class="course">
         <h2>Main</h2>
-        <p class="hint">Choose one.</p>
-        <div class="list" id="mains" role="radiogroup" aria-label="Main course"></div>
+        <p class="hint">Optional. Add as many as you like.</p>
+        <div class="list" id="mains"></div>
       </section>
 
       <section class="course">
@@ -287,7 +283,7 @@ const SIDES = MENU.filter(d => d.course === "side");
 const EXTRAS = [...SHARE, ...SIDES];
 const ALL = Object.fromEntries(MENU.map(d => [d.id, d]));
 const EGG_DISH = MENU.find(d => d.egg);
-const NO_MAIN = "none", MAX_QTY = 9, ID_KEY = "cru-preorder:id";
+const MAX_QTY = 9, ID_KEY = "cru-preorder:id";
 const label = d => d.n + (d.g ? " " + d.g : "");
 const baht = n => "฿" + n.toLocaleString("en-US");
 const $ = id => document.getElementById(id);
@@ -303,7 +299,7 @@ const store = {
   set(v){ try { v ? localStorage.setItem(ID_KEY, v) : localStorage.removeItem(ID_KEY); } catch (e) {} },
 };
 
-const blank = name => ({name: name || "", main: null, items: {}, egg: 0, notes: ""});
+const blank = name => ({name: name || "", items: {}, egg: 0, notes: ""});
 let state = blank(), saved = null;
 let myId = validId(store.get()) ? store.get() : null;
 let adminKey = null;
@@ -333,19 +329,20 @@ function cleanText(s, multiline){
 }
 function clean(o){
   const items = {};
-  EXTRAS.forEach(d => { const q = Math.min(MAX_QTY, Math.max(0, (o.items || {})[d.id] | 0)); if (q) items[d.id] = q; });
+  MENU.forEach(d => { const q = Math.min(MAX_QTY, Math.max(0, (o.items || {})[d.id] | 0)); if (q) items[d.id] = q; });
   const eggMax = EGG_DISH ? items[EGG_DISH.id] || 0 : 0;
-  return {name: cleanText(o.name, false), main: o.main || null, items, egg: Math.min(Math.max(0, o.egg | 0), eggMax), notes: cleanText(o.notes, true)};
+  return {name: cleanText(o.name, false), items, egg: Math.min(Math.max(0, o.egg | 0), eggMax), notes: cleanText(o.notes, true)};
 }
 const same = (a, b) => JSON.stringify(clean(a)) === JSON.stringify(clean(b));
 function totalOf(o){
-  let t = ALL[o.main] && ALL[o.main].course === "main" ? ALL[o.main].p : 0;
+  let t = 0;
   for (const id in o.items) if (ALL[id]) t += ALL[id].p * o.items[id];
   if (EGG_DISH) t += EGG_DISH.egg * o.egg;
   return t;
 }
-function extrasText(o){
-  return EXTRAS.filter(d => o.items[d.id]).map(d => {
+const mainCount = o => MAINS.reduce((n, d) => n + (o.items[d.id] || 0), 0);
+function itemsText(o, dishes){
+  return dishes.filter(d => o.items[d.id]).map(d => {
     const q = o.items[d.id];
     let s = (q > 1 ? q + "× " : "") + label(d);
     if (EGG_DISH && d.id === EGG_DISH.id && o.egg) s += " (+" + o.egg + " egg yolk" + (o.egg > 1 ? "s" : "") + ")";
@@ -381,14 +378,6 @@ function stepper(id, name, onChange){
   plus.onclick = () => onChange(1);
   return el("div", {cls: "step", id: "st_" + id}, [minus, out, plus]);
 }
-function buildMains(){
-  const box = $("mains");
-  [...MAINS, {id: NO_MAIN, n: "No main for me"}].forEach(d => {
-    const inp = el("input", {type: "radio", name: "main", id: "main_" + d.id, value: d.id});
-    inp.addEventListener("change", () => { state.main = d.id; render(); });
-    box.append(el("label", {cls: "opt", for: "main_" + d.id, "data-id": d.id}, [inp, dishText(d), el("span", {cls: "price", text: d.p ? d.p + ".-" : ""})]));
-  });
-}
 function buildQty(boxId, list){
   const box = $(boxId);
   list.forEach(d => {
@@ -421,12 +410,7 @@ const writable = () => configured && (isAdmin || !closedNow());
 const ready = () => loaded || loadError || !myId;   // wait for a returning guest's order before editing
 
 function render(){
-  document.querySelectorAll("#mains .opt").forEach(l => {
-    const on = state.main === l.dataset.id;
-    l.classList.toggle("sel", on);
-    l.querySelector("input").checked = on;
-  });
-  EXTRAS.forEach(d => {
+  MENU.forEach(d => {
     const q = state.items[d.id] || 0, st = $("st_" + d.id), [minus, , plus] = st.children;
     $("q_" + d.id).textContent = q;
     st.classList.toggle("on", q > 0);
@@ -446,8 +430,7 @@ function render(){
   $("fs").disabled = !writable() || !ready();
 
   const dirty = !saved || !same(state, saved);
-  const complete = mine.name && mine.main;
-  $("save").disabled = !writable() || !ready() || saving || !complete || !dirty;
+  $("save").disabled = !writable() || !ready() || saving || !mine.name || !dirty;
   $("save").textContent = saved ? "Update order" : "Save order";
   $("remove").hidden = !saved || !writable();
   $("remove").disabled = saving;
@@ -458,7 +441,6 @@ function render(){
   else if (!writable()) s = "Orders are closed";
   else if (saving) s = "Saving…";
   else if (!mine.name) s = "Add your name to save";
-  else if (!mine.main) s = "Choose a main (or ‘No main’)";
   else if (saved && !dirty) s = "Saved ✓";
   else s = "Unsaved changes";
   $("status").textContent = s;
@@ -479,9 +461,13 @@ function renderTally(){
   const mc = {}, xc = {};
   let grand = 0, mains = 0, noMain = 0;
   list.forEach(o => {
-    if (ALL[o.main] && ALL[o.main].course === "main") { mc[o.main] = (mc[o.main] || 0) + 1; mains++; }
-    else noMain++;
-    for (const k in o.items) xc[k] = (xc[k] || 0) + o.items[k];
+    for (const k in o.items) {
+      const map = ALL[k].course === "main" ? mc : xc;
+      map[k] = (map[k] || 0) + o.items[k];
+    }
+    const m = mainCount(o);
+    mains += m;
+    if (!m) noMain++;
     if (o.egg) xc._egg = (xc._egg || 0) + o.egg;
     grand += totalOf(o);
   });
@@ -502,14 +488,14 @@ function renderTally(){
     if (tail) box.append(tail);
   };
   counts($("tMains"), mc, MAINS, "No orders yet. Yours could be the first.",
-    noMain ? el("div", {cls: "count muted"}, [el("span", {text: "No main"}), el("b", {text: "× " + noMain})]) : null);
+    noMain ? el("div", {cls: "count muted"}, [el("span", {text: "Guests with no main"}), el("b", {text: noMain})]) : null);
   const eggRow = EGG_DISH ? [{id: "_egg", n: "Raw egg yolk add-on", g: "(larb)"}] : [];
   counts($("tExtras"), xc, [...EXTRAS, ...eggRow], "Nothing added yet.");
 
   const pb = $("tPeople");
   pb.replaceChildren();
   if (!list.length) { pb.append(el("div", {cls: "empty", text: "Each saved order will be listed here."})); return; }
-  const heads = ["Name", "Main", "Extras", "Dietary", "Total"].concat(isAdmin ? [""] : []);
+  const heads = ["Name", "Mains", "Extras", "Dietary", "Total"].concat(isAdmin ? [""] : []);
   const tb = el("tbody");
   list.forEach(o => {
     const name = el("td", {}, [document.createTextNode(o.name)]);
@@ -517,8 +503,8 @@ function renderTally(){
     const diet = el("td", {"data-k": "Dietary"}, [o.notes ? el("span", {cls: "flag", text: o.notes}) : el("span", {cls: "muted", text: "—"})]);
     const tr = el("tr", {cls: o.mine ? "me" : ""}, [
       name,
-      el("td", {"data-k": "Main", text: ALL[o.main] ? label(ALL[o.main]) : "No main"}),
-      el("td", {"data-k": "Extras", text: extrasText(o) || "—"}),
+      el("td", {"data-k": "Mains", text: itemsText(o, MAINS) || "—"}),
+      el("td", {"data-k": "Extras", text: itemsText(o, EXTRAS) || "—"}),
       diet,
       el("td", {cls: "n", "data-k": "Total", text: baht(totalOf(o))}),
     ]);
@@ -561,14 +547,13 @@ function renderAdmin(){
 
 function kitchenSummary(){
   const list = orders.map(clean).sort((a, b) => a.name.localeCompare(b.name));
-  const count = id => list.reduce((n, o) => n + (o.main === id ? 1 : 0), 0);
   const qty = id => list.reduce((n, o) => n + (o.items[id] || 0), 0);
   const eggs = list.reduce((n, o) => n + o.egg, 0);
-  const noMain = list.filter(o => !ALL[o.main]).length;
+  const noMain = list.filter(o => !mainCount(o)).length;
   const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
-  const lines = ["CRU · GROUP DINNER PRE-ORDER", plural(list.length, "guest") + " · " + plural(list.length - noMain, "main"), ""];
+  const lines = ["CRU · GROUP DINNER PRE-ORDER", plural(list.length, "guest") + " · " + plural(list.reduce((n, o) => n + mainCount(o), 0), "main"), ""];
   const section = (title, rows) => { if (rows.length) lines.push(title, ...rows, ""); };
-  section("MAINS", MAINS.filter(d => count(d.id)).map(d => count(d.id) + " × " + label(d))
+  section("MAINS", MAINS.filter(d => qty(d.id)).map(d => qty(d.id) + " × " + label(d))
     .concat(noMain ? ["(" + noMain + " guest" + (noMain > 1 ? "s" : "") + " with no main)"] : []));
   const extraLine = d => {
     let s = qty(d.id) + " × " + label(d);
@@ -578,7 +563,7 @@ function kitchenSummary(){
   section("TO SHARE", SHARE.filter(d => qty(d.id)).map(extraLine));
   section("SIDES", SIDES.filter(d => qty(d.id)).map(extraLine));
   section("DIETARY NOTES", list.filter(o => o.notes).map(o => o.name + ": " + o.notes.replace(/\n+/g, " / ")));
-  section("MAINS BY GUEST", list.map(o => o.name + ": " + (ALL[o.main] ? label(ALL[o.main]) : "no main")));
+  section("MAINS BY GUEST", list.map(o => o.name + ": " + (itemsText(o, MAINS) || "no main")));
   lines.push("Food total: " + baht(list.reduce((n, o) => n + totalOf(o), 0)) + " (before drinks and service)");
   return lines.join("\n");
 }
@@ -724,7 +709,7 @@ async function copyText(text, btn){
 }
 
 // ── Wiring ───────────────────────────────────────────────────────────────────
-buildMains(); buildQty("share", SHARE); buildQty("sides", SIDES);
+buildQty("mains", MAINS); buildQty("share", SHARE); buildQty("sides", SIDES);
 $("name").addEventListener("input", e => { state.name = e.target.value; render(); });
 $("notes").addEventListener("input", e => { state.notes = e.target.value; render(); });
 $("save").onclick = save;
