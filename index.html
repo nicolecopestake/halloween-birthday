@@ -28,6 +28,7 @@
   --paper:#161514; --card:#1F1E1C; --ink:#ECEAE6; --muted:#A39F99; --rule:#34312E;
   --claret:#E07A86; --claret-soft:#3A2226; --ok:#7FC79A; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}   /* keep hidden working on elements that set their own display, like the egg row */
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 140px}
