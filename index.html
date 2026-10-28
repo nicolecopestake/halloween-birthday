@@ -10,34 +10,36 @@
 <meta name="theme-color" content="#161514" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Jost:wght@400;500;600&family=Noto+Sans+Thai:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prata&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans+Thai:wght@400;500&display=swap">
 <style>
-/* Layout: one narrow menu column like the printed Cru card, sticky order bar at the bottom, group tally below (organiser only) */
+/* Layout: one narrow menu column like the printed Cru card, sticky order bar at the bottom, group tally below (organiser only).
+   Type matches Cru's printed menu: Prata for course headings, IBM Plex Sans for dish names, IBM Plex Sans Thai for the Thai names. */
 :root{
   --paper:#F0EFEC; --card:#F8F7F5; --ink:#1C1B1A; --muted:#6E6B67; --rule:#D6D3CE;
   --claret:#7C1E2A; --claret-soft:#F1E1E2; --ok:#2F6B45;
-  --display:"Bodoni Moda","Didot","Bodoni 72",Georgia,serif;
-  --body:"Jost","Avenir Next","Helvetica Neue",Arial,sans-serif;
-  --thai:"Noto Sans Thai","Thonburi","Leelawadee UI",sans-serif;
+  --display:"Prata","Didot","Bodoni 72",Georgia,serif;
+  --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --thai:"IBM Plex Sans Thai","Thonburi","Leelawadee UI",sans-serif;
+  --logo-filter:none;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#161514; --card:#1F1E1C; --ink:#ECEAE6; --muted:#A39F99; --rule:#34312E;
-  --claret:#E07A86; --claret-soft:#3A2226; --ok:#7FC79A; color-scheme:dark}}
+  --claret:#E07A86; --claret-soft:#3A2226; --ok:#7FC79A; --logo-filter:invert(.92); --grain:none; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#161514; --card:#1F1E1C; --ink:#ECEAE6; --muted:#A39F99; --rule:#34312E;
-  --claret:#E07A86; --claret-soft:#3A2226; --ok:#7FC79A; color-scheme:dark}
+  --claret:#E07A86; --claret-soft:#3A2226; --ok:#7FC79A; --logo-filter:invert(.92); --grain:none; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}   /* keep hidden working on elements that set their own display, like the egg row */
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+body{margin:0;background:var(--paper) var(--grain);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 140px}
 .wrap{max-width:640px;margin:0 auto}
-header{padding-block:40px 8px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
-.mark{font-family:var(--display);font-size:56px;line-height:.9;font-weight:500;letter-spacing:-.02em}
-.mark span{font-size:.55em;letter-spacing:.02em}
+header{padding-block:32px 8px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap-reverse}
+.logo{display:block;width:128px;height:auto;filter:var(--logo-filter);margin-left:auto}
 .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500}
-h1{font-family:var(--display);font-weight:500;font-size:22px;margin:4px 0 0;text-wrap:balance}
+h1{font-family:var(--display);font-weight:400;font-size:24px;letter-spacing:-.01em;margin:6px 0 0;text-wrap:balance}
 .intro{color:var(--muted);max-width:60ch;margin:12px 0 0}
 .deadline{margin:10px 0 0;font-size:13px;letter-spacing:.06em;color:var(--claret);font-weight:500}
 .notice{margin-top:20px;padding:12px 14px;border:1px solid var(--claret);background:var(--claret-soft);border-radius:4px;font-size:14px}
@@ -51,31 +53,34 @@ textarea{min-height:72px;resize:vertical}
 input:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--claret);outline-offset:2px}
 a{color:var(--claret)}
 section.course{margin-top:44px}
-.course h2{font-family:var(--display);font-weight:700;font-size:40px;letter-spacing:-.03em;line-height:1;margin:0;text-wrap:balance}
+.course h2,#tally h2{font-family:var(--display);font-weight:400;font-size:52px;letter-spacing:-.055em;line-height:.95;margin:0;text-transform:uppercase;text-wrap:balance}
 .course .hint{color:var(--muted);font-size:13px;margin:6px 0 14px}
 .list{display:grid;border-top:1px solid var(--rule)}
 .row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--rule)}
 .row > div{min-width:0}
-.dish{font-weight:600;font-size:13.5px;letter-spacing:.09em;text-transform:uppercase;overflow-wrap:anywhere}
-.dish .g{font-weight:400;letter-spacing:.04em;text-transform:none;color:var(--muted);margin-left:6px}
-.chili{color:var(--claret);font-size:11px;letter-spacing:.08em;margin-left:6px;font-weight:600}
-.th{font-family:var(--thai);color:var(--muted);font-size:13px}
-.sub{font-size:12.5px;color:var(--muted);font-style:italic}
-.price{font-variant-numeric:tabular-nums;letter-spacing:.06em;font-size:14px;color:var(--muted);white-space:nowrap}
+.dish{font-weight:600;font-size:13.5px;letter-spacing:.11em;text-transform:uppercase;overflow-wrap:anywhere}
+.dish .g{font-weight:400;letter-spacing:.06em;text-transform:none;margin-left:8px}
+.chili{font-size:15px;letter-spacing:0;margin-left:8px;line-height:1}
+.nowrap{white-space:nowrap}
+.th{font-family:var(--thai);font-size:14px;margin-top:1px}
+.sub{font-size:11.5px;font-style:italic;text-transform:uppercase;letter-spacing:.1em}
+.desc{font-size:13px;line-height:1.4;color:var(--muted);margin-top:3px;max-width:46ch}
+.price{font-variant-numeric:tabular-nums;letter-spacing:.12em;font-size:14px;white-space:nowrap}
 .right{display:flex;align-items:center;gap:14px}
 .step{display:flex;align-items:center;border:1px solid var(--rule);border-radius:999px;background:var(--card);flex:none}
 .step button{font:inherit;width:34px;height:34px;border:0;background:none;color:var(--ink);cursor:pointer;font-size:17px;border-radius:999px;touch-action:manipulation}
 .step button:disabled{opacity:.3;cursor:default}
 .step output{min-width:20px;text-align:center;font-variant-numeric:tabular-nums;font-weight:600}
 .step.on{border-color:var(--claret)}
-.addon{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:13px;margin-top:8px;padding:6px 6px 6px 10px;border-left:2px solid var(--claret)}
+.addon{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:11.5px;font-style:italic;text-transform:uppercase;letter-spacing:.1em;margin-top:8px;padding:6px 6px 6px 10px;border-left:2px solid var(--claret)}
+.addon .step{font-style:normal;letter-spacing:0}
 .addon .step button{width:30px;height:30px}
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--ink);color:var(--paper);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
 .bar .in{max-width:640px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px 12px;flex-wrap:wrap}
 .bar .sum{font-variant-numeric:tabular-nums}
-.bar .sum b{font-family:var(--display);font-size:22px;font-weight:500}
+.bar .sum b{font-family:var(--display);font-size:22px;font-weight:400}
 .bar .st{font-size:12.5px;opacity:.75}
 .btn{font:inherit;font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:12.5px;padding:11px 18px;border-radius:999px;border:1px solid var(--paper);background:var(--paper);color:var(--ink);cursor:pointer;touch-action:manipulation}
 .btn:disabled{opacity:.45;cursor:default}
@@ -88,7 +93,7 @@ section.course{margin-top:44px}
 .card{margin-top:28px;padding:16px;border:1px solid var(--rule);background:var(--card);border-radius:4px}
 .copyrow{display:flex;gap:8px}
 .copyrow input{font-size:13px;color:var(--muted)}
-.admin h2{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.02em;margin:2px 0 12px;line-height:1}
+.admin h2{font-family:var(--display);font-weight:400;font-size:34px;letter-spacing:-.05em;margin:2px 0 12px;line-height:1;text-transform:uppercase}
 .adm{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .adm input[type=datetime-local]{width:auto;flex:1 1 200px}
 .toggle{display:inline-flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;cursor:pointer}
@@ -100,10 +105,9 @@ details{margin-top:14px}
 summary{cursor:pointer;font-size:13px;color:var(--muted)}
 pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:12px;max-height:360px;overflow:auto;margin:8px 0 0}
 #tally{margin-top:64px;padding-top:28px;border-top:3px double var(--rule)}
-#tally h2{font-family:var(--display);font-weight:700;font-size:40px;letter-spacing:-.03em;margin:0;line-height:1}
 .kpis{display:flex;gap:28px;flex-wrap:wrap;margin:14px 0 4px}
 .kpis div{display:grid}
-.kpis b{font-family:var(--display);font-size:30px;font-weight:500;font-variant-numeric:tabular-nums}
+.kpis b{font-family:var(--display);font-size:30px;font-weight:400;font-variant-numeric:tabular-nums}
 .kpis span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .synced{font-size:12px;color:var(--muted);margin:0}
 h3{font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin:28px 0 8px;font-weight:600}
@@ -136,7 +140,7 @@ tr.me td:first-child{box-shadow:inset 3px 0 var(--claret);padding-left:8px}
   td.n{text-align:left}
   td.act{padding-top:6px}
 }
-@media (max-width:420px){.mark{font-size:44px}.course h2,#tally h2{font-size:34px}body{padding-bottom:170px}}
+@media (max-width:420px){.logo{width:112px}.course h2,#tally h2{font-size:44px}body{padding-bottom:170px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -147,9 +151,10 @@ tr.me td:first-child{box-shadow:inset 3px 0 var(--claret);padding-left:8px}
       <div class="eyebrow">Group dinner · pre-order</div>
       <h1>Choose your dishes for the night</h1>
     </div>
-    <div class="mark" aria-label="Cru">C<span>RU</span></div>
+    <img class="logo" src="cru-logo.png" width="424" height="280" alt="Cru, 2nd Floor wine bar">
   </header>
   <p class="intro">Order whatever you like: mains, sharing plates and sides are all optional. Save your order and you can come back to change it any time. Prices are in Thai baht.</p>
+  <p class="intro">Each dish has a short description as a guide. If you have allergies, put them in the notes and Cru's team will check for you.</p>
   <p class="deadline" id="deadline" hidden></p>
   <div class="notice" id="notice" role="alert" hidden></div>
 
@@ -244,37 +249,37 @@ const POLL_MS = 20000;   // how often the page checks the deadline (and, for the
 
 // ── Menu ─────────────────────────────────────────────────────────────────────
 // Edit dishes and prices here. course: "main" | "share" | "side".
-// g = portion size, th = Thai name, sub = small note, hot = SPICY tag,
+// g = portion size, th = Thai name, sub = small note, desc = what the dish is, hot = chilli icon,
 // egg = price of the raw egg yolk add-on, charged per yolk (0–9 yolks, once the dish is ordered).
 // If you add, remove or reprice a dish, mirror the id and price in MENU in Code.gs.
 const MENU = [
-  {course:"main", id:"m_shrimp",    n:"Creamy Shrimp Pasta", th:"พาสต้าซอสครีมกุ้ง", p:360, hot:true},
-  {course:"main", id:"m_meatballs", n:"Spaghetti & Meatballs", th:"สปาเกตตี้มีตบอล", p:360},
-  {course:"main", id:"m_chicken",   n:"Grilled Chicken Thigh with Jaew & Nam Prik Kha", g:"250g", th:"สะโพกไก่ย่างหนังกรอบ กับแจ่วมะขามและน้ำพริกข่า", p:300},
-  {course:"main", id:"m_ribs",      n:"Braised Beef Short Ribs with Chimichurri", g:"200g", th:"เนื้อร่องซี่โครงตุ๋น กับน้ำจิ้มสไตล์อาร์เจนติน่า", p:300},
-  {course:"main", id:"m_picanha",   n:"Grilled Picanha w/ Nam Jim Jaew", g:"250g", th:"พิคานย่าย่างจิ้มแจ่ว", p:550},
+  {course:"main", id:"m_shrimp",    n:"Creamy Shrimp Pasta", th:"พาสต้าซอสครีมกุ้ง", p:360, hot:true, desc:"Pasta with prawns in a creamy sauce, with a chilli kick."},
+  {course:"main", id:"m_meatballs", n:"Spaghetti & Meatballs", th:"สปาเกตตี้มีตบอล", p:360, desc:"Classic spaghetti and meatballs."},
+  {course:"main", id:"m_chicken",   n:"Grilled Chicken Thigh with Jaew & Nam Prik Kha", g:"250g", th:"สะโพกไก่ย่างหนังกรอบ กับแจ่วมะขามและน้ำพริกข่า", p:300, desc:"Crispy-skinned grilled chicken thigh with jaew (tamarind and chilli dipping sauce) and nam prik kha (galangal chilli paste)."},
+  {course:"main", id:"m_ribs",      n:"Braised Beef Short Ribs with Chimichurri", g:"200g", th:"เนื้อร่องซี่โครงตุ๋น กับน้ำจิ้มสไตล์อาร์เจนติน่า", p:300, desc:"Slow-braised beef short ribs with chimichurri, an Argentinian herb, garlic and vinegar sauce."},
+  {course:"main", id:"m_picanha",   n:"Grilled Picanha w/ Nam Jim Jaew", g:"250g", th:"พิคานย่าย่างจิ้มแจ่ว", p:550, desc:"Grilled picanha (beef rump cap) with nam jim jaew, a smoky Thai dried-chilli dipping sauce."},
 
-  {course:"share", id:"s_gougeres",     n:"Gougères", th:"ชีสพัฟสไตล์เบอกันดี", p:180},
-  {course:"share", id:"s_cashew",       n:"Sea Salt Roasted Cashew Nuts", th:"เม็ดมะม่วงหิมพานต์อบคั่วดอกเกลือ", p:120},
-  {course:"share", id:"s_cashew_spicy", n:"Spicy Roasted Cashew Nuts", th:"ยำเม็ดมะม่วงหิมพานต์", p:150, hot:true},
-  {course:"share", id:"s_bruschetta",   n:"Bruschetta", th:"ขนมปังหน้ามะเขือเทศสไตล์อิตาเลียน", p:190},
-  {course:"share", id:"s_shrimp_toast", n:"Cheesy Shrimp Toast", th:"ขนมปังหน้ากุ้งอบชีส", p:250},
-  {course:"share", id:"s_nanban",       n:"Chicken Nanban", th:"ไก่ทอดซอสนันบัง", p:260},
-  {course:"share", id:"s_meatball",     n:"Meatball w/ Spicy Sauce", th:"เนื้อปั้นก้อนซอสเผ็ด", p:260},
-  {course:"share", id:"s_tomato",       n:"Tomato Salad", th:"สลัดมะเขือเทศ", p:220},
-  {course:"share", id:"s_gambas",       n:"Gambas al Ajillo", th:"ทาปาสกุ้งสไตล์สเปน", p:360, hot:true},
-  {course:"share", id:"s_yukke",        n:"Beef Yukke", th:"ยุกเกะเนื้อ", p:280},
-  {course:"share", id:"s_larb",         n:"Signature Larb Tartare", th:"ลาบตาร์ทาร์แบบครูวๆ", p:260, hot:true, egg:20},
-  {course:"share", id:"s_platter_half", n:"Cru Platter · Half", sub:"2 cheese, 1 charcuterie", th:"รวมชีสและโคลคัต", p:360},
-  {course:"share", id:"s_platter_full", n:"Cru Platter · Full", sub:"3 cheese, 2 charcuterie", th:"รวมชีสและโคลคัต", p:550},
+  {course:"share", id:"s_gougeres",     n:"Gougères", th:"ชีสพัฟสไตล์เบอกันดี", p:180, desc:"Warm French cheese puffs made with choux pastry."},
+  {course:"share", id:"s_cashew",       n:"Sea Salt Roasted Cashew Nuts", th:"เม็ดมะม่วงหิมพานต์อบคั่วดอกเกลือ", p:120, desc:"Roasted cashews with sea salt."},
+  {course:"share", id:"s_cashew_spicy", n:"Spicy Roasted Cashew Nuts", th:"ยำเม็ดมะม่วงหิมพานต์", p:150, hot:true, desc:"Roasted cashews tossed Thai yum-style: a spicy, sour dressing with chilli and lime."},
+  {course:"share", id:"s_bruschetta",   n:"Bruschetta", th:"ขนมปังหน้ามะเขือเทศสไตล์อิตาเลียน", p:190, desc:"Toasted bread topped with Italian-style tomatoes."},
+  {course:"share", id:"s_shrimp_toast", n:"Cheesy Shrimp Toast", th:"ขนมปังหน้ากุ้งอบชีส", p:250, desc:"Toast topped with prawns and baked with cheese."},
+  {course:"share", id:"s_nanban",       n:"Chicken Nanban", th:"ไก่ทอดซอสนันบัง", p:260, desc:"Japanese-style fried chicken in a tangy sweet vinegar sauce."},
+  {course:"share", id:"s_meatball",     n:"Meatball w/ Spicy Sauce", th:"เนื้อปั้นก้อนซอสเผ็ด", p:260, desc:"Meatballs in a spicy sauce."},
+  {course:"share", id:"s_tomato",       n:"Tomato Salad", th:"สลัดมะเขือเทศ", p:220, desc:"A fresh tomato salad."},
+  {course:"share", id:"s_gambas",       n:"Gambas al Ajillo", th:"ทาปาสกุ้งสไตล์สเปน", p:360, hot:true, desc:"Spanish-style prawns sizzled in olive oil with garlic and chilli."},
+  {course:"share", id:"s_yukke",        n:"Beef Yukke", th:"ยุกเกะเนื้อ", p:280, desc:"Korean-Japanese raw beef tartare, seasoned with soy and sesame. Served raw."},
+  {course:"share", id:"s_larb",         n:"Signature Larb Tartare", th:"ลาบตาร์ทาร์แบบครูวๆ", p:260, hot:true, egg:20, desc:"Cru's own tartare with the flavours of Thai larb: lime, chilli and fresh herbs. Served raw."},
+  {course:"share", id:"s_platter_half", n:"Cru Platter · Half", sub:"(2 cheese / 1 charcuterie)", th:"รวมชีสและโคลคัต", p:360, desc:"A sharing board of two cheeses and one cured meat."},
+  {course:"share", id:"s_platter_full", n:"Cru Platter · Full", sub:"(3 cheese / 2 charcuterie)", th:"รวมชีสและโคลคัต", p:550, desc:"A sharing board of three cheeses and two cured meats."},
 
-  {course:"side", id:"d_tomato",    n:"Cherry Tomato", g:"100g", p:80},
-  {course:"side", id:"d_baguette",  n:"French Baguette", g:"100g", p:80},
-  {course:"side", id:"d_olive",     n:"Olive & Pickle", g:"50g", p:80},
-  {course:"side", id:"d_cheese50",  n:"Cheese", g:"50g", p:180},
-  {course:"side", id:"d_cheese100", n:"Cheese", g:"100g", p:300},
-  {course:"side", id:"d_cold50",    n:"Cold Cut", g:"50g", p:150},
-  {course:"side", id:"d_cold100",   n:"Cold Cut", g:"100g", p:280},
+  {course:"side", id:"d_tomato",    n:"Cherry Tomato", g:"100g", p:80, desc:"A side of cherry tomatoes."},
+  {course:"side", id:"d_baguette",  n:"French Baguette", g:"100g", p:80, desc:"Sliced French baguette."},
+  {course:"side", id:"d_olive",     n:"Olive & Pickle", g:"50g", p:80, desc:"Olives and pickles."},
+  {course:"side", id:"d_cheese50",  n:"Cheese", g:"50g", p:180, desc:"Cheese from Cru's selection."},
+  {course:"side", id:"d_cheese100", n:"Cheese", g:"100g", p:300, desc:"Cheese from Cru's selection."},
+  {course:"side", id:"d_cold50",    n:"Cold Cut", g:"50g", p:150, desc:"Cured meats (charcuterie) from Cru's selection."},
+  {course:"side", id:"d_cold100",   n:"Cold Cut", g:"100g", p:280, desc:"Cured meats (charcuterie) from Cru's selection."},
 ];
 
 // ── Setup ────────────────────────────────────────────────────────────────────
@@ -363,12 +368,21 @@ function el(tag, attrs = {}, kids = []){
   return e;
 }
 function dishText(d){
-  const t = el("div", {cls: "dish"}, [document.createTextNode(d.n)]);
-  if (d.g) t.append(el("span", {cls: "g", text: d.g}));
-  if (d.hot) t.append(el("span", {cls: "chili", text: "SPICY"}));
+  const t = el("div", {cls: "dish"});
+  const chili = d.hot ? el("span", {cls: "chili", role: "img", "aria-label": "spicy", title: "Spicy", text: "🌶️"}) : null;
+  if (chili && !d.g) {
+    // keep the chilli on the same line as the last word, like the printed menu
+    const cut = d.n.lastIndexOf(" ") + 1;
+    t.append(document.createTextNode(d.n.slice(0, cut)), el("span", {cls: "nowrap", text: d.n.slice(cut)}, [chili]));
+  } else {
+    t.append(document.createTextNode(d.n));
+    if (d.g) t.append(el("span", {cls: "g", text: d.g}));
+    if (chili) t.append(chili);
+  }
   const w = el("div", {}, [t]);
   if (d.sub) w.append(el("div", {cls: "sub", text: d.sub}));
   if (d.th) w.append(el("div", {cls: "th", text: d.th, lang: "th"}));
+  if (d.desc) w.append(el("div", {cls: "desc", text: d.desc}));
   return w;
 }
 function stepper(id, name, onChange){
@@ -385,7 +399,7 @@ function buildQty(boxId, list){
     const left = dishText(d);
     if (d.egg) {
       const row = el("div", {cls: "addon", id: "eggrow"}, [
-        el("span", {}, [document.createTextNode("Raw egg yolk "), el("span", {cls: "price", text: "+" + d.egg + " each"})]),
+        el("span", {}, [document.createTextNode("Add on raw egg yolk "), el("span", {cls: "price", text: "+" + d.egg + " each"})]),
         stepper("egg", "raw egg yolk", n => setEgg(state.egg + n)),
       ]);
       row.hidden = true;

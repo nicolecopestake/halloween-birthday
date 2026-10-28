@@ -5,6 +5,7 @@ Guests open one link, enter their name, pick their dishes and save. No account n
 | File | What it is |
 |---|---|
 | `index.html` | The whole page (HTML, CSS, JS). Host it on GitHub Pages or Netlify. |
+| `cru-logo.png` | Cru's logo, cut out of the printed menu. Upload it next to `index.html`. |
 | `Code.gs` | The Google Apps Script backend that reads and writes the Sheet. |
 | `dev/mock-server.mjs` | Optional: a local copy of the backend for testing (needs Node 18+). |
 | `dev/api-test.mjs` | Optional: server-side checks to run against the mock. |
@@ -137,7 +138,7 @@ Guests who ordered before the reset still have their old order ID on their phone
 
 The menu lives in two places, kept deliberately simple:
 
-1. **`index.html`:** the `MENU` array at the top of the script. This is what guests see: names, Thai names, sizes, prices, SPICY tags, and the egg yolk price on the larb.
+1. **`index.html`:** the `MENU` array at the top of the script. This is what guests see: names, Thai names, sizes, prices, short descriptions (`desc`), chilli icons for spicy dishes (`hot`), and the egg yolk price on the larb.
 2. **`Code.gs`:** the `MENU` array at the top. This is what the server accepts, and what the Sheet columns and totals use.
 
 Use the same `id` and price in both files. Then:

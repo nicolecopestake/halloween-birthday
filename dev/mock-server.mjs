@@ -218,7 +218,8 @@ http.createServer(async (req, res) => {
 
 http.createServer((req, res) => {
   const p = new URL(req.url, "http://x").pathname;
-  if (p !== "/" && p !== "/index.html") { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
-  res.end(fs.readFileSync(path.join(ROOT, "index.html")));
+  const files = { "/": ["index.html", "text/html; charset=utf-8"], "/index.html": ["index.html", "text/html; charset=utf-8"], "/cru-logo.png": ["cru-logo.png", "image/png"] };
+  if (!files[p]) { res.writeHead(404); return res.end(); }
+  res.writeHead(200, { "Content-Type": files[p][1], "Cache-Control": "no-store" });
+  res.end(fs.readFileSync(path.join(ROOT, files[p][0])));
 }).listen(WEB_PORT, () => console.log(`Page on http://localhost:${WEB_PORT}/?api=http://localhost:${API_PORT}/exec`));
