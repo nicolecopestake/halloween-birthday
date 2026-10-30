@@ -578,7 +578,8 @@ function kitchenSummary(){
   section("TO SHARE", SHARE.filter(d => qty(d.id)).map(extraLine));
   section("SIDES", SIDES.filter(d => qty(d.id)).map(extraLine));
   section("DIETARY NOTES", list.filter(o => o.notes).map(o => o.name + ": " + o.notes.replace(/\n+/g, " / ")));
-  section("MAINS BY GUEST", list.map(o => o.name + ": " + (itemsText(o, MAINS) || "no main")));
+  section("ORDERS BY GUEST", list.map(o => o.name + ": " + [itemsText(o, MAINS) || "no main", itemsText(o, SHARE), itemsText(o, SIDES)]
+    .filter(Boolean).join(" + ")));
   lines.push("Food total: " + baht(list.reduce((n, o) => n + totalOf(o), 0)) + " (before drinks and service)");
   return lines.join("\n");
 }

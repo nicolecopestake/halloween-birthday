@@ -98,7 +98,7 @@ const API_URL = "https://script.google.com/macros/s/AKfy…/exec";
 
 - **Order deadline:** switch it on and pick a date and time. Once that time passes, guests can't save or remove orders; the page tells them to ask you. You can still edit your own order. Switch it off to reopen.
 - **Close orders now:** sets the deadline to the current time (tap twice).
-- **Copy kitchen summary:** copies a plain-text list of dish counts (including egg yolks), dietary notes and mains by guest, ready to send to Cru. **Preview kitchen summary** shows the same text, in case your phone blocks clipboard access.
+- **Copy kitchen summary:** copies a plain-text list of dish counts (including egg yolks), dietary notes and each guest's full order (mains, sharing plates and sides), ready to send to Cru. **Preview kitchen summary** shows the same text, in case your phone blocks clipboard access.
 - **Remove** buttons on each row of the by-person table, for duplicates or no-shows.
 
 **The Sheet**
